@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import './Visualizer.css';
-
-const ARRAY_SIZE = 200;
+// I need to make the size of the array bars be based on the size of the screen
+const ARRAY_SIZE = 100;
 const ANIMATION_SPEED = 5;
+const MAX_ARRAY_ELEMENT = 400;
 
 class Visualizer extends React.Component {
 
@@ -29,7 +30,7 @@ class Visualizer extends React.Component {
     newArray = () => {
         const arr = [];
         for (let i = 0; i < ARRAY_SIZE; i++) {
-            arr.push(getRandomInt(5, 600));
+            arr.push(getRandomInt(5, MAX_ARRAY_ELEMENT));
         }
         console.log("made new array");
         return arr;
