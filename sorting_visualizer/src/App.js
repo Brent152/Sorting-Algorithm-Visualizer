@@ -1,6 +1,5 @@
 import logo from './logo.svg';
 import './App.css';
-import Counter from './components/counter';
 import Visualizer from './components/Visualizer';
 
 function App() {

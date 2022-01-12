@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './Visualizer.css';
 // I need to make the size of the array bars be based on the size of the screen
 const ARRAY_SIZE = 100;
-const ANIMATION_SPEED = 5;
+const ANIMATION_SPEED = 50;
 const MAX_ARRAY_ELEMENT_NUMBER = 400;
 const UNSORTED_COLOR = "rgb(219, 25, 25)", SORTING_COLOR = "rgb(52, 24, 211)", SORTED_COLOR = "rgb(31, 212, 31)", CHECK_COLOR = "fuchsia";
 const PAUSE_MULTIPLIER = 20;
