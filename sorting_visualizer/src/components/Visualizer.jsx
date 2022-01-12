@@ -2,9 +2,10 @@ import React, { Component } from 'react';
 import './Visualizer.css';
 // I need to make the size of the array bars be based on the size of the screen
 const ARRAY_SIZE = 100;
-const ANIMATION_SPEED = 500;
+const ANIMATION_SPEED = 5;
 const MAX_ARRAY_ELEMENT_NUMBER = 400;
-const UNSORTED_COLOR = "rgb(219, 25, 25)", SORTING_COLOR = "rgb(52, 24, 211)", SORTED_COLOR = "rgb(31, 212, 31)";
+const UNSORTED_COLOR = "rgb(219, 25, 25)", SORTING_COLOR = "rgb(52, 24, 211)", SORTED_COLOR = "rgb(31, 212, 31)", CHECK_COLOR = "fuchsia";
+const PAUSE_MULTIPLIER = 20;
 
 class Visualizer extends React.Component {
 
@@ -46,6 +47,7 @@ class Visualizer extends React.Component {
 
     // Selection sort the array - called by Selection Sort Button
     selectionSort = () => {
+        this.state.frames = [];
         let minIndex, temp;
         // Brand new array copied from this.state.array
         const arr = [];
@@ -58,14 +60,20 @@ class Visualizer extends React.Component {
         for (let startIndex = 0; startIndex < ARRAY_SIZE; startIndex++) {
             minIndex = startIndex;
             for (let curIndex = startIndex; curIndex < ARRAY_SIZE; curIndex++) {
+                // Every bar it checks turns magenta for a frame
+                arr[curIndex].color = CHECK_COLOR;
+                this.saveFrame(arr);
+                arr[curIndex].color = UNSORTED_COLOR;
                 if (arr[curIndex].value <= arr[minIndex].value) {
                     minIndex = curIndex;
                 }
             }
-            // Set sorting colors and save frame
+            // Set sorting colors and save frame a lot of times so it has a pause
             arr[minIndex].color = SORTING_COLOR;
             arr[startIndex].color = SORTING_COLOR;
-            this.saveFrame(arr);
+            for (let i = 0; i < PAUSE_MULTIPLIER; i++) {
+                this.saveFrame(arr);
+            }
 
             // Swap values
             temp = arr[minIndex].value;
@@ -83,27 +91,42 @@ class Visualizer extends React.Component {
 
     // Insertion sort the array - called by Insertion Sort Button
     insertionSort = () => {
+        this.state.frames = [];
+        console.log("Start Insertion Sort");
         // Brand new array copied from this.state.array
         const arr = [];
         for (const element of this.state.array) {
             arr.push(element);
         }
+        arr[0].color = SORTED_COLOR;
 
         for (let sortingIndex = 1; sortingIndex < ARRAY_SIZE; sortingIndex++) {
-            let temp = arr[sortingIndex].value;
             
-            for (let curIndex = sortingIndex-1; curIndex >= 0; curIndex--) {
-                if (arr[sortingIndex].value < arr[curIndex].value) {
-                    arr[curIndex+1].value = arr[curIndex].value; 
-                } else {
-                    arr[curIndex].value = temp;
-                    break;
-                }
-            }
+            let temp = arr[sortingIndex].value;
+            arr[sortingIndex].color = SORTING_COLOR;
             this.saveFrame(arr);
+            
+            let curIndex = sortingIndex-1;
+            while (curIndex >= 0 && arr[curIndex].value > temp) {
+                arr[curIndex+1].color = CHECK_COLOR;
+                this.saveFrame(arr);
+                arr[curIndex+1].value = arr[curIndex].value;
+                arr[curIndex+1].color = SORTED_COLOR;
+                curIndex--;
+            }
+            arr[curIndex+1].value = temp;
 
-            this.animate();
+            // Set sorting color and pause
+            arr[curIndex+1].color = SORTING_COLOR;
+            for (let i = 0; i < PAUSE_MULTIPLIER; i++) {
+                this.saveFrame(arr);
+            }
+            arr[curIndex+1].color = SORTED_COLOR;
+
+            this.saveFrame(arr);
         }
+
+        this.animate();
     }
 
     // Loops through frames array slowly - called by sorting functions
