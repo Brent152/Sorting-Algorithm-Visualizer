@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './Visualizer.css';
 // I need to make the size of the array bars be based on the size of the screen
 const ARRAY_SIZE = 100;
-const ANIMATION_SPEED = 50;
+const ANIMATION_SPEED = 500;
 const MAX_ARRAY_ELEMENT_NUMBER = 400;
 const UNSORTED_COLOR = "rgb(219, 25, 25)", SORTING_COLOR = "rgb(52, 24, 211)", SORTED_COLOR = "rgb(31, 212, 31)";
 
@@ -44,7 +44,7 @@ class Visualizer extends React.Component {
         return arr;
     }
 
-    // Selection sort the array from Selection Sort Button
+    // Selection sort the array - called by Selection Sort Button
     selectionSort = () => {
         let minIndex, temp;
         // Brand new array copied from this.state.array
@@ -62,20 +62,48 @@ class Visualizer extends React.Component {
                     minIndex = curIndex;
                 }
             }
+            // Set sorting colors and save frame
             arr[minIndex].color = SORTING_COLOR;
             arr[startIndex].color = SORTING_COLOR;
             this.saveFrame(arr);
+
             // Swap values
             temp = arr[minIndex].value;
             arr[minIndex].value = arr[startIndex].value;
             arr[startIndex].value = temp;
 
+            // Set sorting colors and save frame
             arr[minIndex].color = UNSORTED_COLOR;
             arr[startIndex].color = SORTED_COLOR;
             this.saveFrame(arr);
         }
         // Animate the frames array
         this.animate();
+    }
+
+    // Insertion sort the array - called by Insertion Sort Button
+    insertionSort = () => {
+        // Brand new array copied from this.state.array
+        const arr = [];
+        for (const element of this.state.array) {
+            arr.push(element);
+        }
+
+        for (let sortingIndex = 1; sortingIndex < ARRAY_SIZE; sortingIndex++) {
+            let temp = arr[sortingIndex].value;
+            
+            for (let curIndex = sortingIndex-1; curIndex >= 0; curIndex--) {
+                if (arr[sortingIndex].value < arr[curIndex].value) {
+                    arr[curIndex+1].value = arr[curIndex].value; 
+                } else {
+                    arr[curIndex].value = temp;
+                    break;
+                }
+            }
+            this.saveFrame(arr);
+
+            this.animate();
+        }
     }
 
     // Loops through frames array slowly - called by sorting functions
@@ -110,7 +138,7 @@ class Visualizer extends React.Component {
                         <button className="btn btn-dark mx-auto" onClick={this.generateArrayHandle}>Generate New Array</button>
                         <div className="mx-auto">
                             <button className="btn btn-dark mx-1" onClick={this.selectionSort}>Selection Sort</button>
-                            <button className="btn btn-dark mx-1">Insertion Sort</button>
+                            <button className="btn btn-dark mx-1" onClick={this.insertionSort}>Insertion Sort</button>
                             <button className="btn btn-dark mx-1">Quick Sort</button>
                         </div>
                     </div>
