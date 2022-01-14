@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import './Visualizer.css';
 // I need to make the size of the array bars be based on the size of the screen
-const ARRAY_SIZE = 100;
-const ANIMATION_SPEED = 50;
+const ARRAY_SIZE = 300;
+const ANIMATION_SPEED = 1;
 const MAX_ARRAY_ELEMENT_NUMBER = 400;
 const UNSORTED_COLOR = "rgb(219, 25, 25)", SORTING_COLOR = "rgb(52, 24, 211)",
-        SORTED_COLOR = "rgb(31, 212, 31)", CHECK_COLOR = "fuchsia", WALL_COLOR = "black";
+        SORTED_COLOR = "rgb(31, 212, 31)", CHECK_COLOR = "fuchsia", WALL_COLOR = "black",
+        PIVOT_COLOR = "gray";
 const PAUSE_MULTIPLIER = 20;
 
 class Visualizer extends React.Component {
@@ -179,17 +180,21 @@ class Visualizer extends React.Component {
         }
 
         this.quickSort(arr, 0, ARRAY_SIZE-1);
-        this.saveFrames(arr, 1);
+
         this.animate();
     }
 
     quickSort = (arr, lowIndex, highIndex) => {
-        let lowWall = lowIndex;
-        let highWall = highIndex;
-        arr[lowWall].color = WALL_COLOR;
-        arr[highWall].color = WALL_COLOR;
+        arr[lowIndex].color = WALL_COLOR;
+        arr[highIndex].color = WALL_COLOR;
+        this.saveFrames(arr, 1);
 
         if (lowIndex >= highIndex) {
+            // All stuff in these bounds must be sorted
+            arr[lowIndex].color = SORTED_COLOR;
+            arr[highIndex].color = SORTED_COLOR;
+            arr[pivotIndex].color = SORTED_COLOR;
+            this.saveFrames(arr, 1);
             return;
         }
         
@@ -198,52 +203,84 @@ class Visualizer extends React.Component {
         // the most sense 
         let pivotValue = arr[Math.floor(lowIndex + (highIndex - lowIndex)/2)].value;
         let pivotIndex = Math.floor(lowIndex + (highIndex - lowIndex)/2);
+        let incrementedI, decrementedJ;
+        arr[pivotIndex].color = PIVOT_COLOR;
 
         let i = lowIndex, j = highIndex, temp;
 
         while (i <= j) {
-            // Increment i until it finds a value greater than pivot
-            while (arr[i].value < pivotValue) {
-                i++;
+            // Had to combine two loops into one with if statements for animation purposes
+            while (arr[i].value < pivotValue || arr[j].value > pivotValue) {
+                // Increment i until it finds a value greater than pivot
+                if (arr[i].value < pivotValue) {
+                    arr[i].color = CHECK_COLOR;
+                    i++;
+                    incrementedI = true;
+                } else {
+                    arr[i].color = SORTING_COLOR;
+                    incrementedI = false;
+                }
+                // Decrement j until it finds a value less than pivot
+                if (arr[j].value > pivotValue) {
+                    arr[j].color = CHECK_COLOR;
+                    j--;
+                    decrementedJ = true;
+                } else {
+                    arr[j].color = SORTING_COLOR;
+                    decrementedJ = false;
+                }
+                this.saveFrames(arr, 1);
+                // Change anything changed back to unsorted
+                if (incrementedI) {
+                    arr[i-1].color = UNSORTED_COLOR;
+                } else {
+                    arr[i].color = UNSORTED_COLOR;
+                }
+                if (decrementedJ) {
+                    arr[j+1].color = UNSORTED_COLOR;
+                } else {
+                    arr[j].color = UNSORTED_COLOR;
+                }
+                arr[lowIndex].color = WALL_COLOR;
+                arr[highIndex].color = WALL_COLOR;
             }
-
-            // Decrement j until it finds a value less than pivot
-            while (arr[j].value > pivotValue) {
-                j--;
-            }
+            arr[i].color = SORTING_COLOR;
+            arr[j].color = SORTING_COLOR;
+            this.saveFrames(arr, 1);
+            // Change back to unsorted
+            arr[i].color = UNSORTED_COLOR;
+            arr[j].color = UNSORTED_COLOR;
+            arr[lowIndex].color = WALL_COLOR;
+            arr[highIndex].color = WALL_COLOR;
 
             if (i <= j) {
                 // Swap values at i and j and show their colors
-                arr[i].color = SORTING_COLOR;
-                arr[j].color = SORTING_COLOR;
-                this.saveFrames(arr, 1);
                 temp = arr[i].value;
                 arr[i].value = arr[j].value;
                 arr[j].value = temp;
-                // After swap change them back to unsorted/wall colors
-                arr[i].color = UNSORTED_COLOR;
-                arr[j].color = UNSORTED_COLOR;
-                arr[lowWall].color = WALL_COLOR;
-                arr[highWall].color = WALL_COLOR;
-                this.saveFrames(arr, 1);
                 i++;
                 j--;
-
             }
         }
         if (lowIndex < j) {
-            arr[lowWall].color = UNSORTED_COLOR;
-            arr[highWall].color = UNSORTED_COLOR;
+            arr[highIndex].color = UNSORTED_COLOR;
+            this.saveFrames(arr, 1);
             this.quickSort(arr, lowIndex, j);
         }
+        
         if (highIndex > i) {
-            arr[lowWall].color = UNSORTED_COLOR;
-            arr[highWall].color = UNSORTED_COLOR;
+            // Some indicies are assumed sorted? Make all them the right color lol
+            for (let w = lowIndex; w < i; w++) {
+                arr[w].color = SORTED_COLOR;
+            }
+            arr[lowIndex].color = SORTED_COLOR;
+            this.saveFrames(arr, 1);
             this.quickSort(arr, i, highIndex);
         }
+        // All stuff in these bounds must be sorted
+        arr[lowIndex].color = SORTED_COLOR;
+        arr[highIndex].color = SORTED_COLOR;
         arr[pivotIndex].color = SORTED_COLOR;
-        arr[lowWall].color = UNSORTED_COLOR;
-        arr[highWall].color = UNSORTED_COLOR;
         this.saveFrames(arr, 1);
     }
     // End of Quick sort
