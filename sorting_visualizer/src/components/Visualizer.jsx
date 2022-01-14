@@ -2,9 +2,10 @@ import React, { Component } from 'react';
 import './Visualizer.css';
 // I need to make the size of the array bars be based on the size of the screen
 const ARRAY_SIZE = 100;
-const ANIMATION_SPEED = 1;
+const ANIMATION_SPEED = 50;
 const MAX_ARRAY_ELEMENT_NUMBER = 400;
-const UNSORTED_COLOR = "rgb(219, 25, 25)", SORTING_COLOR = "rgb(52, 24, 211)", SORTED_COLOR = "rgb(31, 212, 31)", CHECK_COLOR = "fuchsia";
+const UNSORTED_COLOR = "rgb(219, 25, 25)", SORTING_COLOR = "rgb(52, 24, 211)",
+        SORTED_COLOR = "rgb(31, 212, 31)", CHECK_COLOR = "fuchsia", WALL_COLOR = "black";
 const PAUSE_MULTIPLIER = 20;
 
 class Visualizer extends React.Component {
@@ -176,43 +177,76 @@ class Visualizer extends React.Component {
         for (const element of this.state.array) {
             arr.push(element);
         }
-        this.quickSort(arr, 0, ARRAY_SIZE-1);
-        // Pick the middle index as the pivot, this is slower than doing something like
-        // the middle-of-3 method, but for visualization I think the middle index makes
-        // the most sense
 
+        this.quickSort(arr, 0, ARRAY_SIZE-1);
         this.saveFrames(arr, 1);
-        // Animate the array
         this.animate();
     }
 
     quickSort = (arr, lowIndex, highIndex) => {
-        if (arr[lowIndex].value < arr[highIndex].value) {
-            let pivotIndex = this.quickSortPartition(arr, lowIndex, highIndex);
-            this.quickSort(arr, lowIndex, pivotIndex);
-            this.quickSort(arr, pivotIndex+1, highIndex);
-        }
-    }
+        let lowWall = lowIndex;
+        let highWall = highIndex;
+        arr[lowWall].color = WALL_COLOR;
+        arr[highWall].color = WALL_COLOR;
 
-    quickSortPartition = (arr, lowIndex, highIndex) => {
-        let temp;
-        let pivot = arr[lowIndex].value;
-        let leftWall = lowIndex;
-        for (let i = lowIndex+1; i < highIndex; i++) {
-            if (arr[i].value < pivot) {
-                // Swap
+        if (lowIndex >= highIndex) {
+            return;
+        }
+        
+        // Pick the middle index as the pivot, this is slower than doing something like
+        // the middle-of-3 method, but for visualization I think the middle index makes
+        // the most sense 
+        let pivotValue = arr[Math.floor(lowIndex + (highIndex - lowIndex)/2)].value;
+        let pivotIndex = Math.floor(lowIndex + (highIndex - lowIndex)/2);
+
+        let i = lowIndex, j = highIndex, temp;
+
+        while (i <= j) {
+            // Increment i until it finds a value greater than pivot
+            while (arr[i].value < pivotValue) {
+                i++;
+            }
+
+            // Decrement j until it finds a value less than pivot
+            while (arr[j].value > pivotValue) {
+                j--;
+            }
+
+            if (i <= j) {
+                // Swap values at i and j and show their colors
+                arr[i].color = SORTING_COLOR;
+                arr[j].color = SORTING_COLOR;
+                this.saveFrames(arr, 1);
                 temp = arr[i].value;
-                arr[i].value = arr[leftWall].value;
-                arr[leftWall].value = temp;
-                leftWall++;
+                arr[i].value = arr[j].value;
+                arr[j].value = temp;
+                // After swap change them back to unsorted/wall colors
+                arr[i].color = UNSORTED_COLOR;
+                arr[j].color = UNSORTED_COLOR;
+                arr[lowWall].color = WALL_COLOR;
+                arr[highWall].color = WALL_COLOR;
+                this.saveFrames(arr, 1);
+                i++;
+                j--;
+
             }
         }
-        temp = pivot;
-        pivot = arr[leftWall].value;
-        arr[leftWall].value = pivot;
-        return leftWall;
+        if (lowIndex < j) {
+            arr[lowWall].color = UNSORTED_COLOR;
+            arr[highWall].color = UNSORTED_COLOR;
+            this.quickSort(arr, lowIndex, j);
+        }
+        if (highIndex > i) {
+            arr[lowWall].color = UNSORTED_COLOR;
+            arr[highWall].color = UNSORTED_COLOR;
+            this.quickSort(arr, i, highIndex);
+        }
+        arr[pivotIndex].color = SORTED_COLOR;
+        arr[lowWall].color = UNSORTED_COLOR;
+        arr[highWall].color = UNSORTED_COLOR;
+        this.saveFrames(arr, 1);
     }
-    // --- End of Quick Sort ---
+    // End of Quick sort
 
     // Loops through frames array slowly - called by sorting functions
     animate = () => {
