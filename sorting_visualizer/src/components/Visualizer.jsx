@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import './Visualizer.css';
 // I need to make the size of the array bars be based on the size of the screen
-const ARRAY_SIZE = 300;
+const ARRAY_SIZE = 10;
 const ANIMATION_SPEED = 1;
 const MAX_ARRAY_ELEMENT_NUMBER = 400;
 const UNSORTED_COLOR = "rgb(219, 25, 25)", SORTING_COLOR = "rgb(52, 24, 211)",
@@ -285,6 +285,61 @@ class Visualizer extends React.Component {
     }
     // End of Quick sort
 
+    // Merge Sort the array - called by Merge Sort Button
+    mergeSortHandle = () => {
+        this.state.frames = [];
+        console.log("Start Merge Sort");
+        // Brand new array copied from this.state.array
+        const arr = [];
+        for (const element of this.state.array) {
+            arr.push(element);
+        }
+        this.mergeSort(arr, 0, ARRAY_SIZE-1);
+        this.saveFrames(arr, 1);
+        this.animate();
+    }
+
+    mergeSort = (arr, lowIndex, highIndex) => {
+        if (lowIndex < highIndex) {
+            // Get middle of the array
+            let middleIndex = lowIndex + Math.floor((highIndex - lowIndex)/2);
+            // Recursively mergeSort the first and second half
+            this.mergeSort(arr, lowIndex, highIndex);
+            this.mergeSort(arr, middleIndex+1, highIndex);
+            // Merge the first and second half
+            this.merge(arr, lowIndex, middleIndex, highIndex);
+        }
+    }
+
+    merge = (arr, lowIndex, middleIndex, highIndex) => {
+        let secondLowIndex = middleIndex+1;
+        let tempValue, shiftingIndex;
+        // Already Sorted!!!
+        if (arr[middleIndex].value <= arr[secondLowIndex].value) {
+            return;
+        }
+
+        while (lowIndex <= middleIndex && secondLowIndex <= highIndex) {
+            if (arr[lowIndex].value <= arr[secondLowIndex].value) {
+                lowIndex++;
+            } else {
+                tempValue = arr[secondLowIndex].value; // Save middle value
+                shiftingIndex = secondLowIndex;
+
+                // Move Shift elements from lowIndex to shiftingIndex to the right
+                while (shiftingIndex != lowIndex) {
+                    arr[shiftingIndex].value = arr[shiftingIndex-1].value;
+                    shiftingIndex--;
+                }
+                arr[lowIndex].value = tempValue; // Restore first value
+
+                lowIndex++;
+                middleIndex++;
+                secondLowIndex++;
+            }
+        }
+    }
+
     // Loops through frames array slowly - called by sorting functions
     animate = () => {
         let i = 0;
@@ -322,7 +377,7 @@ class Visualizer extends React.Component {
                             <button className="btn btn-dark mx-1" onClick={this.bubbleSortHandle}>Bubble Sort</button>
                             <button className="btn btn-dark mx-1" onClick={this.insertionSortHandle}>Insertion Sort</button>
                             <button className="btn btn-dark mx-1" onClick={this.quickSortHandle}>Quick Sort</button>
-                            <button className="btn btn-dark mx-1" onClick={this.quickSortHandle}>Merge Sort</button>
+                            <button className="btn btn-dark mx-1" onClick={this.mergeSortHandle}>Merge Sort</button>
                             <button className="btn btn-dark mx-1" onClick={this.quickSortHandle}>Heap Sort</button>
                             <button className="btn btn-dark mx-1" onClick={this.quickSortHandle}>Block Sort</button>
                         </div>
