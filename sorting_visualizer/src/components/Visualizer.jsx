@@ -5,7 +5,7 @@ const ARRAY_SIZE = 150;
 const MAX_ARRAY_ELEMENT_NUMBER = 400;
 const UNSORTED_COLOR = "rgb(219, 25, 25)", SORTING_COLOR = "rgb(52, 24, 211)",
         SORTED_COLOR = "rgb(31, 212, 31)", CHECK_COLOR = "fuchsia", WALL_COLOR = "black",
-        PIVOT_COLOR = "gray";
+        EXTRA_COMPARISON_COLOR = "gray";
 const PAUSE_MULTIPLIER = 20;
 
 // Global but changed by user (or caused by a user change)
@@ -36,9 +36,9 @@ class Visualizer extends React.Component {
                             <button className="btn btn-dark mx-1" onClick={this.selectionSortHandle} disabled={this.state.isAnimating}>Selection Sort</button>
                             <button className="btn btn-dark mx-1" onClick={this.bubbleSortHandle} disabled={this.state.isAnimating}>Bubble Sort</button>
                             <button className="btn btn-dark mx-1" onClick={this.insertionSortHandle} disabled={this.state.isAnimating}>Insertion Sort</button>
-                            <button className="btn btn-dark mx-1" onClick={this.quickSortHandle} disabled={this.state.isAnimating}>Quick Sort</button>
+                            <button className="btn btn-dark mx-1" onClick={this.heapSortHandle} disabled={this.state.isAnimating}>Heap Sort</button>
                             <button className="btn btn-dark mx-1" onClick={this.mergeSortHandle} disabled={this.state.isAnimating}>Merge Sort</button>
-                            <button className="btn btn-dark mx-1" onClick={this.quickSortHandle} disabled={this.state.isAnimating}>Heap Sort</button>
+                            <button className="btn btn-dark mx-1" onClick={this.quickSortHandle} disabled={this.state.isAnimating}>Quick Sort</button>
                             <button className="btn btn-dark mx-1" onClick={this.quickSortHandle} disabled={this.state.isAnimating}>Block Sort</button>
                         </div>
                     </div>
@@ -239,6 +239,16 @@ class Visualizer extends React.Component {
         arr[lowIndex].color = WALL_COLOR;
         arr[highIndex].color = WALL_COLOR;
         this.saveFrames(arr, 1);
+        
+        // Pick the middle index as the pivot, this is slower than doing something like
+        // the middle-of-3 method, but for visualization I think the middle index makes
+        // the most sense 
+        let pivotValue = arr[Math.floor(lowIndex + (highIndex - lowIndex)/2)].value;
+        let pivotIndex = Math.floor(lowIndex + (highIndex - lowIndex)/2);
+        let incrementedI, decrementedJ;
+        arr[pivotIndex].color = EXTRA_COMPARISON_COLOR;
+
+        let i = lowIndex, j = highIndex, temp;
 
         if (lowIndex >= highIndex) {
             // All stuff in these bounds must be sorted
@@ -248,16 +258,6 @@ class Visualizer extends React.Component {
             this.saveFrames(arr, 1);
             return;
         }
-        
-        // Pick the middle index as the pivot, this is slower than doing something like
-        // the middle-of-3 method, but for visualization I think the middle index makes
-        // the most sense 
-        let pivotValue = arr[Math.floor(lowIndex + (highIndex - lowIndex)/2)].value;
-        let pivotIndex = Math.floor(lowIndex + (highIndex - lowIndex)/2);
-        let incrementedI, decrementedJ;
-        arr[pivotIndex].color = PIVOT_COLOR;
-
-        let i = lowIndex, j = highIndex, temp;
 
         while (i <= j) {
             // Had to combine two loops into one with if statements for animation purposes
@@ -436,17 +436,107 @@ class Visualizer extends React.Component {
             j++;
             k++;
         }
-        if (lowIndex == 0 && middleIndex+array2Size+1 == ARRAY_SIZE) {
+        if (lowIndex === 0 && middleIndex+array2Size+1 === ARRAY_SIZE) {
             for (let i = 0; i < ARRAY_SIZE; i++) {
                 arr[i].color = SORTED_COLOR;
             }
         }
         this.saveFrames(arr, 1);
+    }
+    // End of Merge Sort
 
+    // Heap Sort the array - called by Heap Sort Button
+    heapSortHandle = () => {
+        // The gray is the root of the current heap comparisons, the
+        // pink are it's childs, it takes the largest of the three of
+        // and puts it at the root index
+
+        this.state.frames = [];
+        console.log("Start Heap Sort");
+        // Brand new array copied from this.state.array
+        const arr = [];
+        for (const element of this.state.array) {
+            arr.push(element);
+        }
+
+        // Build the array into a heap
+        for (let i = Math.floor(ARRAY_SIZE/2) - 1; i >= 0; i--) {
+            this.maxHeapify(arr, ARRAY_SIZE, i);
+        }
+
+        let tempValue;
+        // Extract elements from heap
+        for (let i = ARRAY_SIZE-1; i > 0; i--) {
+            tempValue = arr[0].value;
+            arr[0].value = arr[i].value;
+            arr[i].value = tempValue;
+            arr[i].color = SORTED_COLOR;
+
+            this.saveFrames(arr, 1);
+
+            // maxHeapify the reduced heap
+            this.maxHeapify(arr, i, 0);
+        }
+        // Don't need to maxHeapify when one element is left but do need to turn it to SORTED_COLOR
+        arr[0].color = SORTED_COLOR;
+        this.saveFrames(arr, 1);
+
+        this.animate();
+    }
+
+    maxHeapify(arr, heapSize, rootIndex) {
+        let tempValue;
+        let largestIndex = rootIndex;
+        // Left child
+        let leftIndex = 2*rootIndex + 1;
+        // Right child
+        let rightIndex = 2*rootIndex + 2;
+
+        if (leftIndex < heapSize) {
+            arr[leftIndex].color = CHECK_COLOR;
+            arr[largestIndex].color = EXTRA_COMPARISON_COLOR;
+        }
+        if (rightIndex < heapSize) {
+            arr[rightIndex].color = CHECK_COLOR;
+            arr[largestIndex].color = EXTRA_COMPARISON_COLOR;
+        }
+        this.saveFrames(arr, 1);
+        if (leftIndex < heapSize) {
+            arr[leftIndex].color = UNSORTED_COLOR;
+            arr[largestIndex].color = UNSORTED_COLOR;
+        }
+        if (rightIndex < heapSize) {
+            arr[rightIndex].color = UNSORTED_COLOR;
+            arr[largestIndex].color = UNSORTED_COLOR;
+        }
+
+        // Find if a child a larger than the root (if both are take largest one)
+        if (leftIndex < heapSize && arr[leftIndex].value > arr[largestIndex].value) {
+            largestIndex = leftIndex;
+        }
+        if (rightIndex < heapSize && arr[rightIndex].value > arr[largestIndex].value) {
+            largestIndex = rightIndex;
+        }
+
+        if (largestIndex !== rootIndex) {
+            tempValue = arr[rootIndex].value;
+            arr[rootIndex].value = arr[largestIndex].value;
+            arr[largestIndex].value = tempValue;
+
+            arr[rootIndex].color = SORTING_COLOR;
+            arr[largestIndex].color = SORTING_COLOR;
+            this.saveFrames(arr, 1);
+            arr[rootIndex].color = UNSORTED_COLOR;
+            arr[largestIndex].color = UNSORTED_COLOR;
+            // Heapify whats left
+            this.maxHeapify(arr, heapSize, largestIndex);
+        }
     }
 
     // Loops through frames array slowly - called by sorting functions
     animate = () => {
+        console.log("Sorted Array:");
+        console.log(this.state.array);
         let i = 0;
         this.setState({array: this.state.frames[i]});
         this.setState({isAnimating: true});
