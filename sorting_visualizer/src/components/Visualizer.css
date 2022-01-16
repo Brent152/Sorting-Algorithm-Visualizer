@@ -1,34 +1,11 @@
 .array-bar {
-  width: 8px;
   display: inline-block;
-  margin-left: 1px;
-  margin-right: 1px;
   margin-bottom: 0;
 }
-
-/* .array-bar-blue {
-  width: 5px;
-  background-color: rgb(27, 140, 206);
-  display: inline-block;
-  margin-left: 1px;
-  margin-right: 1px;
-  margin-bottom: 0;
-}
-
-.array-bar-green {
-  width: 5px;
-  background-color: rgb(31, 212, 31);
-  display: inline-block;
-  margin-left: 1px;
-  margin-right: 1px;
-  margin-bottom: 0;
-} */
 
 .array-container {
   position: absolute;
-  margin: 0;
   bottom: 10%;
-  left: 0%;
 }
 
 .rectangle {

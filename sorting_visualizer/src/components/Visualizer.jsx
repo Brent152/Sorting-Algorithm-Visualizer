@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import './Visualizer.css';
 // I need to make the size of the array bars be based on the size of the screen
-const ARRAY_SIZE = 150;
 const MAX_ARRAY_ELEMENT_NUMBER = 400;
 const UNSORTED_COLOR = "rgb(219, 25, 25)", SORTING_COLOR = "rgb(52, 24, 211)",
         SORTED_COLOR = "rgb(31, 212, 31)", CHECK_COLOR = "fuchsia", WALL_COLOR = "black",
@@ -9,7 +8,11 @@ const UNSORTED_COLOR = "rgb(219, 25, 25)", SORTING_COLOR = "rgb(52, 24, 211)",
 const PAUSE_MULTIPLIER = 20;
 
 // Global but changed by user (or caused by a user change)
+let ARRAY_SIZE = 150;
 let ANIMATION_SPEED = 20;
+let FAST_MODE = false;
+
+let MARGIN_LEFT, BAR_WIDTH;
 
 
 class Visualizer extends React.Component {
@@ -30,34 +33,62 @@ class Visualizer extends React.Component {
         return (
             <React.Fragment>
                 <nav className="navbar navbar-expand-lg navbar-light bg-light">
-                    <div className="collapse navbar-collapse" id="navbarSupportedContent">
-                        <button className="btn btn-dark mx-auto" onClick={this.generateArrayHandle} disabled={this.state.isAnimating}>Generate New Array</button>
-                        <div className="mx-auto">
-                            <button className="btn btn-dark mx-1" onClick={this.selectionSortHandle} disabled={this.state.isAnimating}>Selection Sort</button>
-                            <button className="btn btn-dark mx-1" onClick={this.bubbleSortHandle} disabled={this.state.isAnimating}>Bubble Sort</button>
-                            <button className="btn btn-dark mx-1" onClick={this.insertionSortHandle} disabled={this.state.isAnimating}>Insertion Sort</button>
-                            <button className="btn btn-dark mx-1" onClick={this.heapSortHandle} disabled={this.state.isAnimating}>Heap Sort</button>
-                            <button className="btn btn-dark mx-1" onClick={this.mergeSortHandle} disabled={this.state.isAnimating}>Merge Sort</button>
-                            <button className="btn btn-dark mx-1" onClick={this.quickSortHandle} disabled={this.state.isAnimating}>Quick Sort</button>
-                            <button className="btn btn-dark mx-1" onClick={this.quickSortHandle} disabled={this.state.isAnimating}>Block Sort</button>
-                        </div>
+                    <div className="form-group mx-auto">
+                        <label htmlFor="arraySizeRange" className="form-label">Random Array Size</label>
+                        <input type="range" className="form-range" min="1" max="500" defaultValue="150" step="1" id="arraySizeRange"
+                            onChange={this.arraySizeChangeHandle} disabled={this.state.isAnimating}></input>
+                    </div>
+                    <div className="mx-auto">
+                        <button className="btn btn-dark mx-1" onClick={this.selectionSortHandle} disabled={this.state.isAnimating}>Selection Sort</button>
+                        <button className="btn btn-dark mx-1" onClick={this.bubbleSortHandle} disabled={this.state.isAnimating}>Bubble Sort</button>
+                        <button className="btn btn-dark mx-1" onClick={this.insertionSortHandle} disabled={this.state.isAnimating}>Insertion Sort</button>
+                        <button className="btn btn-dark mx-1" onClick={this.heapSortHandle} disabled={this.state.isAnimating}>Heap Sort</button>
+                        <button className="btn btn-dark mx-1" onClick={this.mergeSortHandle} disabled={this.state.isAnimating}>Merge Sort</button>
+                        <button className="btn btn-dark mx-1" onClick={this.quickSortHandle} disabled={this.state.isAnimating}>Quick Sort</button>
+                        <button className="btn btn-dark mx-1" onClick={this.quickSortHandle} disabled={this.state.isAnimating}>Block Sort</button>
                     </div>
                 </nav>
+
                 <nav className="navbar navbar-expand-lg navbar-light bg-light">
-                    <div className="collapse navbar-collapse" id="navbarSupportedContent">
-                        <button className="btn btn-dark mx-auto" onClick={this.generateArrayHandle} disabled={this.state.isAnimating}>?</button>
-                        <div className="mx-auto">
-                            <label htmlFor="customRange1" className="form-label">Speed</label>
+                    <div className="navbar navbar-expand-lg navbar-light mx-auto">
+                        <div className="form-group col-md-6">
+                            <label htmlFor="EnterCustomArrayLabel">Enter Custom Array</label>
+                            <input type="email" className="form-control" id="EnterCustomArrayField" placeholder="Eg. 55, 26, 31..." style={{}}></input>
+                        </div>
+                        <button className="btn btn-dark col-md-4 mx-auto" onClick={this.generateArrayHandle} disabled={this.state.isAnimating} style={{}}>Enter Array</button>
+                    </div>
+
+                    <div className="mx-auto row">
+                        <div className="form-group mx-auto col-sm-6">
+                            <label htmlFor="speedRange" className="form-label">Speed</label>
                             <input type="range" className="form-range" min="1" max="500" defaultValue="480" step="1" id="speedRange"
                                 onChange={this.speedChangeHandle} disabled={this.state.isAnimating}></input>
                         </div>
+
+                        <div className="form-check mx-auto col-sm-6">
+                            <input className="form-check-input mx-auto" type="checkbox" value="" id="ultraFastCheck" onChange={this.ultraFastChangeHandle} disabled={this.state.isAnimating}></input>
+                            <label className="form-check-label mx-auto" htmlFor="ultraFastCheck">Ultra-fast Mode</label>
+                        </div>
                     </div>
                 </nav>
 
 
-                <div className="array-container">
+                <div className="array-container"
+                style={{
+                    right:"20%",
+                    left: "1%"
+
+                }}>
                     {this.state.array.map((bar, index) => (
-                        <div className="array-bar" key={index} style={{height: `${bar.value}px`, backgroundColor: bar.color}}></div>
+                        <div
+                        className="array-bar"
+                        key={index}
+                        style={
+                            {height: `${bar.value}px`, 
+                            backgroundColor: bar.color,
+                            marginLeft: `${MARGIN_LEFT}%`,
+                            width: `${BAR_WIDTH}%`,
+                        }}></div>
                     ))}
                 </div>
 
@@ -70,18 +101,26 @@ class Visualizer extends React.Component {
 
     // Set default state
     componentDidMount() {
-        this.setState({array: this.newArray()});
-        this.setState({frames: []});
-    }
-
-    // Called by Generate New Array Button and sets the state to a new array
-    generateArrayHandle = () => {
+        MARGIN_LEFT = 10.0/ARRAY_SIZE;
+        BAR_WIDTH = (100-5-(MARGIN_LEFT*ARRAY_SIZE))/ARRAY_SIZE;
+        FAST_MODE = document.getElementById("ultraFastCheck").value;
         this.setState({array: this.newArray()});
         this.setState({frames: []});
     }
 
     speedChangeHandle = () => {
         ANIMATION_SPEED = 500-document.getElementById("speedRange").value;
+    }
+
+    arraySizeChangeHandle = () => {
+        ARRAY_SIZE = document.getElementById("arraySizeRange").value;
+        MARGIN_LEFT = 5/ARRAY_SIZE;
+        BAR_WIDTH = (100-5-(MARGIN_LEFT*ARRAY_SIZE))/ARRAY_SIZE;
+        this.setState({array: this.newArray()});
+    }
+
+    ultraFastChangeHandle = () => {
+        FAST_MODE = !FAST_MODE;
     }
 
     // Creates a new array and returns it
@@ -115,7 +154,7 @@ class Visualizer extends React.Component {
             for (let curIndex = startIndex; curIndex < ARRAY_SIZE; curIndex++) {
                 // Every bar it checks turns magenta for a frame
                 arr[curIndex].color = CHECK_COLOR;
-                this.saveFrames(arr, 1);
+                this.saveFrames(arr, 1, false);
                 arr[curIndex].color = UNSORTED_COLOR;
                 if (arr[curIndex].value <= arr[minIndex].value) {
                     minIndex = curIndex;
@@ -124,7 +163,7 @@ class Visualizer extends React.Component {
             // Set sorting colors and save frame a lot of times so it has a pause
             arr[minIndex].color = SORTING_COLOR;
             arr[startIndex].color = SORTING_COLOR;
-            this.saveFrames(arr, PAUSE_MULTIPLIER);
+            this.saveFrames(arr, PAUSE_MULTIPLIER, false);
 
             // Swap values
             temp = arr[minIndex].value;
@@ -134,7 +173,7 @@ class Visualizer extends React.Component {
             // Set sorting colors and save frame
             arr[minIndex].color = UNSORTED_COLOR;
             arr[startIndex].color = SORTED_COLOR;
-            this.saveFrames(arr, 1);
+            this.saveFrames(arr, 1, true);
         }
         // Animate the frames array
         this.animate();
@@ -157,13 +196,13 @@ class Visualizer extends React.Component {
             for (let j = 0; j < ARRAY_SIZE-i-1; j++) {
                 arr[j].color = SORTING_COLOR;
                 arr[j+1].color = SORTING_COLOR;
-                this.saveFrames(arr, 1);
+                this.saveFrames(arr, 1, false);
                 if (arr[j+1].value < arr[j].value) {
                     // Swap the values
                     temp = arr[j].value;
                     arr[j].value = arr[j+1].value;
                     arr[j+1].value = temp;
-                    this.saveFrames(arr, 1);
+                    this.saveFrames(arr, 1, false);
                 }
                 // Set tested colors back to red
                 arr[j].color = UNSORTED_COLOR;
@@ -171,9 +210,10 @@ class Visualizer extends React.Component {
             }
             // Last piece will be in place, turn it green
             arr[ARRAY_SIZE-i-1].color = SORTED_COLOR;
+            this.saveFrames(arr, 1, true);
         }
         arr[0].color = SORTED_COLOR;
-        this.saveFrames(arr, 1);
+        this.saveFrames(arr, 1, true);
         // Animate the frames array
         this.animate();
     }
@@ -196,13 +236,13 @@ class Visualizer extends React.Component {
             arr[sortingIndex].color = SORTING_COLOR;
             // Set sorting color and pause
             for (let i = 0; i < PAUSE_MULTIPLIER/1.5; i++) {
-                this.saveFrames(arr, 1);
+                this.saveFrames(arr, 1, false);
             }
             
             let curIndex = sortingIndex-1;
             while (curIndex >= 0 && arr[curIndex].value > temp) {
                 arr[curIndex+1].color = CHECK_COLOR;
-                this.saveFrames(arr, 1);
+                this.saveFrames(arr, 1, false);
                 arr[curIndex+1].value = arr[curIndex].value;
                 arr[curIndex+1].color = SORTED_COLOR;
                 curIndex--;
@@ -211,10 +251,10 @@ class Visualizer extends React.Component {
 
             // Set sorting color and pause
             arr[curIndex+1].color = SORTING_COLOR;
-            this.saveFrames(arr, PAUSE_MULTIPLIER/1.5);
+            this.saveFrames(arr, PAUSE_MULTIPLIER/1, false);
             arr[curIndex+1].color = SORTED_COLOR;
 
-            this.saveFrames(arr, 1);
+            this.saveFrames(arr, 1, true);
         }
         // Animate the array
         this.animate();
@@ -238,7 +278,7 @@ class Visualizer extends React.Component {
     quickSort = (arr, lowIndex, highIndex) => {
         arr[lowIndex].color = WALL_COLOR;
         arr[highIndex].color = WALL_COLOR;
-        this.saveFrames(arr, 1);
+        this.saveFrames(arr, 1, false);
         
         // Pick the middle index as the pivot, this is slower than doing something like
         // the middle-of-3 method, but for visualization I think the middle index makes
@@ -255,7 +295,7 @@ class Visualizer extends React.Component {
             arr[lowIndex].color = SORTED_COLOR;
             arr[highIndex].color = SORTED_COLOR;
             arr[pivotIndex].color = SORTED_COLOR;
-            this.saveFrames(arr, 1);
+            this.saveFrames(arr, 1, true);
             return;
         }
 
@@ -280,7 +320,7 @@ class Visualizer extends React.Component {
                     arr[j].color = SORTING_COLOR;
                     decrementedJ = false;
                 }
-                this.saveFrames(arr, 1);
+                this.saveFrames(arr, 1, false);
                 // Change anything changed back to unsorted
                 if (incrementedI) {
                     arr[i-1].color = UNSORTED_COLOR;
@@ -297,7 +337,7 @@ class Visualizer extends React.Component {
             }
             arr[i].color = SORTING_COLOR;
             arr[j].color = SORTING_COLOR;
-            this.saveFrames(arr, 1);
+            this.saveFrames(arr, 1, false);
             // Change back to unsorted
             arr[i].color = UNSORTED_COLOR;
             arr[j].color = UNSORTED_COLOR;
@@ -315,7 +355,7 @@ class Visualizer extends React.Component {
         }
         if (lowIndex < j) {
             arr[highIndex].color = UNSORTED_COLOR;
-            this.saveFrames(arr, 1);
+            this.saveFrames(arr, 1, false);
             this.quickSort(arr, lowIndex, j);
         }
         
@@ -325,14 +365,14 @@ class Visualizer extends React.Component {
                 arr[w].color = SORTED_COLOR;
             }
             arr[lowIndex].color = SORTED_COLOR;
-            this.saveFrames(arr, 1);
+            this.saveFrames(arr, 1, false);
             this.quickSort(arr, i, highIndex);
         }
         // All stuff in these bounds must be sorted
         arr[lowIndex].color = SORTED_COLOR;
         arr[highIndex].color = SORTED_COLOR;
         arr[pivotIndex].color = SORTED_COLOR;
-        this.saveFrames(arr, 1);
+        this.saveFrames(arr, 1, true);
     }
     // End of Quick sort
 
@@ -347,7 +387,10 @@ class Visualizer extends React.Component {
         }
 
         this.mergeSort(arr, 0, ARRAY_SIZE-1);
-        this.saveFrames(arr, 1);
+        for (let i = 0; i < ARRAY_SIZE; i++) {
+            arr[i].color = SORTED_COLOR;
+        }
+        this.saveFrames(arr, 1, true);
         this.animate();
     }
 
@@ -395,7 +438,7 @@ class Visualizer extends React.Component {
                 arr[lowIndex+i].color = SORTING_COLOR;
                 arr[middleIndex+1+j].color = SORTING_COLOR;
 
-                this.saveFrames(arr, 1);
+                this.saveFrames(arr, 1, false);
                 arr[lowIndex+i].color = UNSORTED_COLOR;
                 arr[middleIndex+1+j].color = UNSORTED_COLOR;
                 arr[k].value = Array1[i];
@@ -410,7 +453,7 @@ class Visualizer extends React.Component {
                 arr[lowIndex+i].color = SORTING_COLOR;
                 arr[middleIndex+1+j].color = SORTING_COLOR;
 
-                this.saveFrames(arr, 1);
+                this.saveFrames(arr, 1, false);
                 arr[lowIndex+i].color = UNSORTED_COLOR;
                 arr[middleIndex+1+j].color = UNSORTED_COLOR;
                 arr[k].value = Array2[j];
@@ -441,7 +484,7 @@ class Visualizer extends React.Component {
                 arr[i].color = SORTED_COLOR;
             }
         }
-        this.saveFrames(arr, 1);
+        this.saveFrames(arr, 1, true);
     }
     // End of Merge Sort
 
@@ -472,14 +515,14 @@ class Visualizer extends React.Component {
             arr[i].value = tempValue;
             arr[i].color = SORTED_COLOR;
 
-            this.saveFrames(arr, 1);
+            this.saveFrames(arr, 1, true);
 
             // maxHeapify the reduced heap
             this.maxHeapify(arr, i, 0);
         }
         // Don't need to maxHeapify when one element is left but do need to turn it to SORTED_COLOR
         arr[0].color = SORTED_COLOR;
-        this.saveFrames(arr, 1);
+        this.saveFrames(arr, 1, true);
 
         this.animate();
     }
@@ -500,7 +543,7 @@ class Visualizer extends React.Component {
             arr[rightIndex].color = CHECK_COLOR;
             arr[largestIndex].color = EXTRA_COMPARISON_COLOR;
         }
-        this.saveFrames(arr, 1);
+        this.saveFrames(arr, 1, false);
         if (leftIndex < heapSize) {
             arr[leftIndex].color = UNSORTED_COLOR;
             arr[largestIndex].color = UNSORTED_COLOR;
@@ -525,7 +568,7 @@ class Visualizer extends React.Component {
 
             arr[rootIndex].color = SORTING_COLOR;
             arr[largestIndex].color = SORTING_COLOR;
-            this.saveFrames(arr, 1);
+            this.saveFrames(arr, 1, false);
             arr[rootIndex].color = UNSORTED_COLOR;
             arr[largestIndex].color = UNSORTED_COLOR;
             // Heapify whats left
@@ -551,14 +594,16 @@ class Visualizer extends React.Component {
     }
     
     // Saves given array to this.state.frames
-    saveFrames = (arr, numFrames) => {
-        for (let i = 0; i < numFrames; i++) {
-            const newArr = [];
-            for (const element of arr) {
-              // Make a copy of the object and then push it to the array
-              newArr.push({...element})
+    saveFrames = (arr, numFrames, alwaysDisplay) => {
+        if (!FAST_MODE || alwaysDisplay) {
+            for (let i = 0; i < numFrames; i++) {
+                const newArr = [];
+                for (const element of arr) {
+                // Make a copy of the object and then push it to the array
+                newArr.push({...element})
+                }
+                this.state.frames.push(newArr);
             }
-            this.state.frames.push(newArr);
         }
     }
 }
