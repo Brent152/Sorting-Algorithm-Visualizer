@@ -6,6 +6,7 @@
 .array-container {
   position: absolute;
   bottom: 10%;
+  height: 60%;
 }
 
 .rectangle {

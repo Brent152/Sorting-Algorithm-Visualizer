@@ -1,18 +1,16 @@
 import React, { Component } from 'react';
 import './Visualizer.css';
 // I need to make the size of the array bars be based on the size of the screen
-const MAX_ARRAY_ELEMENT_NUMBER = 400;
+const MAX_ARRAY_ELEMENT_NUMBER = 500;
 const UNSORTED_COLOR = "rgb(219, 25, 25)", SORTING_COLOR = "rgb(52, 24, 211)",
         SORTED_COLOR = "rgb(31, 212, 31)", CHECK_COLOR = "fuchsia", WALL_COLOR = "black",
         EXTRA_COMPARISON_COLOR = "gray";
 const PAUSE_MULTIPLIER = 20;
 
 // Global but changed by user (or caused by a user change)
-let ARRAY_SIZE = 150;
-let ANIMATION_SPEED = 20;
 let FAST_MODE = false;
 
-let MARGIN_LEFT, BAR_WIDTH;
+let ARRAY_SIZE, ANIMATION_SPEED, MARGIN_LEFT, BAR_WIDTH, MAX_ELEMENT_FOUND;
 
 
 class Visualizer extends React.Component {
@@ -33,41 +31,38 @@ class Visualizer extends React.Component {
         return (
             <React.Fragment>
                 <nav className="navbar navbar-expand-lg navbar-light bg-light">
-                    <div className="form-group mx-auto">
+                    <div className="mx-5">
                         <label htmlFor="arraySizeRange" className="form-label">Random Array Size</label>
-                        <input type="range" className="form-range" min="1" max="500" defaultValue="150" step="1" id="arraySizeRange"
-                            onChange={this.arraySizeChangeHandle} disabled={this.state.isAnimating}></input>
+                        <br />
+                        <input type="range" className="form-range" min="2" max="500" defaultValue="100" step="1" id="arraySizeRange"
+                            onChange={this.arraySizeChangeHandle} disabled={this.state.isAnimating} style={{width: "80%"}}></input>
+                        
+                        <button className="btn btn-dark mt-3" onClick={this.generateArrayHandle} disabled={this.state.isAnimating}>Generate New Random Array</button>
                     </div>
                     <div className="mx-auto">
-                        <button className="btn btn-dark mx-1" onClick={this.selectionSortHandle} disabled={this.state.isAnimating}>Selection Sort</button>
-                        <button className="btn btn-dark mx-1" onClick={this.bubbleSortHandle} disabled={this.state.isAnimating}>Bubble Sort</button>
-                        <button className="btn btn-dark mx-1" onClick={this.insertionSortHandle} disabled={this.state.isAnimating}>Insertion Sort</button>
-                        <button className="btn btn-dark mx-1" onClick={this.heapSortHandle} disabled={this.state.isAnimating}>Heap Sort</button>
-                        <button className="btn btn-dark mx-1" onClick={this.mergeSortHandle} disabled={this.state.isAnimating}>Merge Sort</button>
-                        <button className="btn btn-dark mx-1" onClick={this.quickSortHandle} disabled={this.state.isAnimating}>Quick Sort</button>
-                        <button className="btn btn-dark mx-1" onClick={this.quickSortHandle} disabled={this.state.isAnimating}>Block Sort</button>
-                    </div>
-                </nav>
-
-                <nav className="navbar navbar-expand-lg navbar-light bg-light">
-                    <div className="navbar navbar-expand-lg navbar-light mx-auto">
-                        <div className="form-group col-md-6">
-                            <label htmlFor="EnterCustomArrayLabel">Enter Custom Array</label>
-                            <input type="email" className="form-control" id="EnterCustomArrayField" placeholder="Eg. 55, 26, 31..." style={{}}></input>
+                        <label htmlFor="speedRange" className="form-label">Speed</label>
+                        <input type="range" className="form-range" min="1" max="500" defaultValue="480" step="1" id="speedRange"
+                            onChange={this.speedChangeHandle} disabled={this.state.isAnimating} style={{}}></input>
+                        <div className="mt-4">
+                            <input className="form-check-input mx-2" type="checkbox" value="" id="extraFastCheck" onChange={this.extraFastChangeHandle} disabled={this.state.isAnimating}></input>
+                            <label className="form-check-label mx-2" htmlFor="extraFastCheck">Extra-fast Mode</label>
                         </div>
-                        <button className="btn btn-dark col-md-4 mx-auto" onClick={this.generateArrayHandle} disabled={this.state.isAnimating} style={{}}>Enter Array</button>
                     </div>
 
-                    <div className="mx-auto row">
-                        <div className="form-group mx-auto col-sm-6">
-                            <label htmlFor="speedRange" className="form-label">Speed</label>
-                            <input type="range" className="form-range" min="1" max="500" defaultValue="480" step="1" id="speedRange"
-                                onChange={this.speedChangeHandle} disabled={this.state.isAnimating}></input>
+                    <div className="form-group mx-5 mt-3">
+                        <div className="mx-auto">
+                            <button className="btn btn-dark mx-1" onClick={this.selectionSortHandle} disabled={this.state.isAnimating}>Selection Sort</button>
+                            <button className="btn btn-dark mx-1" onClick={this.bubbleSortHandle} disabled={this.state.isAnimating}>Bubble Sort</button>
+                            <button className="btn btn-dark mx-1" onClick={this.insertionSortHandle} disabled={this.state.isAnimating}>Insertion Sort</button>
+                            <button className="btn btn-dark mx-1" onClick={this.heapSortHandle} disabled={this.state.isAnimating}>Heap Sort</button>
+                            <button className="btn btn-dark mx-1" onClick={this.mergeSortHandle} disabled={this.state.isAnimating}>Merge Sort</button>
+                            <button className="btn btn-dark mx-1" onClick={this.quickSortHandle} disabled={this.state.isAnimating}>Quick Sort</button>
+                            <button className="btn btn-dark mx-1" onClick={this.quickSortHandle} disabled={this.state.isAnimating}>Block Sort</button>
                         </div>
-
-                        <div className="form-check mx-auto col-sm-6">
-                            <input className="form-check-input mx-auto" type="checkbox" value="" id="ultraFastCheck" onChange={this.ultraFastChangeHandle} disabled={this.state.isAnimating}></input>
-                            <label className="form-check-label mx-auto" htmlFor="ultraFastCheck">Ultra-fast Mode</label>
+                        <div className="mx-auto">
+                            <label htmlFor="EnterCustomArrayLabel" className="mt-1">Custom Array</label>
+                            <input type="email" className="form-control my-2" id="EnterCustomArrayField" placeholder="Must have spaces between elements!" style={{}}></input>
+                            <button className="btn btn-dark" onClick={this.customArrayHandle} disabled={this.state.isAnimating} style={{}}>Enter Array</button>
                         </div>
                     </div>
                 </nav>
@@ -76,17 +71,15 @@ class Visualizer extends React.Component {
                 <div className="array-container"
                 style={{
                     right:"20%",
-                    left: "1%"
-
+                    left: "1%",
                 }}>
                     {this.state.array.map((bar, index) => (
                         <div
-                        className="array-bar"
+                        className="array-bar border border-auto"
                         key={index}
-                        style={
-                            {height: `${bar.value}px`, 
+                        style={{
+                            height: `${100*bar.value/MAX_ELEMENT_FOUND}%`, 
                             backgroundColor: bar.color,
-                            marginLeft: `${MARGIN_LEFT}%`,
                             width: `${BAR_WIDTH}%`,
                         }}></div>
                     ))}
@@ -101,9 +94,17 @@ class Visualizer extends React.Component {
 
     // Set default state
     componentDidMount() {
-        MARGIN_LEFT = 10.0/ARRAY_SIZE;
+        ARRAY_SIZE = document.getElementById("arraySizeRange").value;
+        MARGIN_LEFT = 5/ARRAY_SIZE;
         BAR_WIDTH = (100-5-(MARGIN_LEFT*ARRAY_SIZE))/ARRAY_SIZE;
-        FAST_MODE = document.getElementById("ultraFastCheck").value;
+        ANIMATION_SPEED = 500-document.getElementById("speedRange").value;
+        FAST_MODE = document.getElementById("extraFastCheck").value;
+        this.setState({array: this.newArray()});
+        this.setState({frames: []});
+    }
+
+    // Called by Generate New Array Button and sets the state to a new array
+    generateArrayHandle = () => {
         this.setState({array: this.newArray()});
         this.setState({frames: []});
     }
@@ -119,8 +120,46 @@ class Visualizer extends React.Component {
         this.setState({array: this.newArray()});
     }
 
-    ultraFastChangeHandle = () => {
+    extraFastChangeHandle = () => {
         FAST_MODE = !FAST_MODE;
+    }
+
+    customArrayHandle = () => {
+        // Get input
+        let input = document.getElementById("EnterCustomArrayField").value;
+        input = input.replace(/[^0-9 ]/g, "");
+        // Parse into an array of integers
+        const inputArray = input.split(" ");
+        // Parse into an array of bar objects
+        const arr = [];
+        for (let i = 0; i < inputArray.length; i++) {
+            if (inputArray[i] != "") {
+                let bar = {
+                    value: Number(inputArray[i]),
+                    color: UNSORTED_COLOR,
+                }
+                arr.push(bar);
+            }
+        }
+        if (arr.length < 2) {
+            alert("Must contain 2 or more elements");
+            return;
+        }
+        // Change "constants"
+        ARRAY_SIZE = arr.length;
+        MARGIN_LEFT = 5/ARRAY_SIZE;
+        BAR_WIDTH = (100-5-(MARGIN_LEFT*ARRAY_SIZE))/ARRAY_SIZE;
+        console.log(ARRAY_SIZE);
+        console.log("Made new custom array");
+        console.log(arr);
+        this.setState({array: arr});
+        // Find largest element
+        MAX_ELEMENT_FOUND = arr[0].value;
+        for (let i = 0; i < ARRAY_SIZE; i++) {
+            if (arr[i].value > MAX_ELEMENT_FOUND) {
+                MAX_ELEMENT_FOUND = arr[i].value;
+            }
+        }
     }
 
     // Creates a new array and returns it
@@ -133,7 +172,14 @@ class Visualizer extends React.Component {
             }
             arr.push(bar);
         }
-        console.log("made new array");
+        // Find largest element
+        MAX_ELEMENT_FOUND = arr[0].value;
+        for (let i = 0; i < ARRAY_SIZE; i++) {
+            if (arr[i].value > MAX_ELEMENT_FOUND) {
+                MAX_ELEMENT_FOUND = arr[i].value;
+            }
+        }
+        console.log("Made new array");
         return arr;
     }
 
