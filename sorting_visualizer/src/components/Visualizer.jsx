@@ -51,13 +51,13 @@ class Visualizer extends React.Component {
 
                     <div className="form-group mx-5 mt-3">
                         <div className="mx-auto">
-                            <button className="btn btn-dark mx-1" onClick={this.selectionSortHandle} disabled={this.state.isAnimating}>Selection Sort</button>
-                            <button className="btn btn-dark mx-1" onClick={this.bubbleSortHandle} disabled={this.state.isAnimating}>Bubble Sort</button>
-                            <button className="btn btn-dark mx-1" onClick={this.insertionSortHandle} disabled={this.state.isAnimating}>Insertion Sort</button>
-                            <button className="btn btn-dark mx-1" onClick={this.heapSortHandle} disabled={this.state.isAnimating}>Heap Sort</button>
-                            <button className="btn btn-dark mx-1" onClick={this.mergeSortHandle} disabled={this.state.isAnimating}>Merge Sort</button>
-                            <button className="btn btn-dark mx-1" onClick={this.quickSortHandle} disabled={this.state.isAnimating}>Quick Sort</button>
-                            <button className="btn btn-dark mx-1" onClick={this.quickSortHandle} disabled={this.state.isAnimating}>Block Sort</button>
+                            <button className="btn btn-dark mx-1 mt-1" onClick={this.selectionSortHandle} disabled={this.state.isAnimating}>Selection Sort</button>
+                            <button className="btn btn-dark mx-1 mt-1" onClick={this.bubbleSortHandle} disabled={this.state.isAnimating}>Bubble Sort</button>
+                            <button className="btn btn-dark mx-1 mt-1" onClick={this.insertionSortHandle} disabled={this.state.isAnimating}>Insertion Sort</button>
+                            <button className="btn btn-dark mx-1 mt-1" onClick={this.heapSortHandle} disabled={this.state.isAnimating}>Heap Sort</button>
+                            <button className="btn btn-dark mx-1 mt-1" onClick={this.mergeSortHandle} disabled={this.state.isAnimating}>Merge Sort</button>
+                            <button className="btn btn-dark mx-1 mt-1" onClick={this.quickSortHandle} disabled={this.state.isAnimating}>Quick Sort</button>
+                            <button className="btn btn-dark mx-1 mt-1" onClick={this.quickSortHandle} disabled={this.state.isAnimating}>Block Sort</button>
                         </div>
                         <div className="mx-auto">
                             <label htmlFor="EnterCustomArrayLabel" className="mt-1">Custom Array</label>
