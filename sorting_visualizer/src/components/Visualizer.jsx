@@ -9,8 +9,11 @@ const PAUSE_MULTIPLIER = 20;
 
 // Global but changed by user (or caused by a user change)
 let FAST_MODE = false;
+let HAS_ANIMATED = false;
+let FRAME_INDEX = 0;
+let SHOW_VALUES = false;
 
-let ARRAY_SIZE, ANIMATION_SPEED, MARGIN_LEFT, BAR_WIDTH, MAX_ELEMENT_FOUND;
+let ARRAY_SIZE, ANIMATION_SPEED, BAR_WIDTH, MAX_ELEMENT_FOUND;
 
 
 class Visualizer extends React.Component {
@@ -31,25 +34,30 @@ class Visualizer extends React.Component {
         return (
             <React.Fragment>
                 <nav className="navbar navbar-expand-lg navbar-light bg-light">
-                    <div className="mx-5">
-                        <label htmlFor="arraySizeRange" className="form-label">Random Array Size</label>
+                    <div className="mx-auto">
+                        <label htmlFor="arraySizeRange" className="form-label" style={{fontWeight: "bold"}}>Random Array Size</label>
                         <br />
-                        <input type="range" className="form-range" min="2" max="500" defaultValue="100" step="1" id="arraySizeRange"
-                            onChange={this.arraySizeChangeHandle} disabled={this.state.isAnimating} style={{width: "80%"}}></input>
-                        
+                        <input type="range" className="form-range w-auto" min="2" max="500" defaultValue="100" step="1" id="arraySizeRange"
+                            onChange={this.arraySizeChangeHandle} disabled={this.state.isAnimating} style={{}}></input>
+                        <br />
                         <button className="btn btn-dark mt-3" onClick={this.generateArrayHandle} disabled={this.state.isAnimating}>Generate New Random Array</button>
                     </div>
-                    <div className="mx-auto">
-                        <label htmlFor="speedRange" className="form-label">Speed</label>
-                        <input type="range" className="form-range" min="1" max="500" defaultValue="480" step="1" id="speedRange"
+                    <div className="w-auto mx-auto">
+                        <label htmlFor="speedRange" className="form-label" style={{fontWeight: "bold"}}>Speed</label>
+                        <br />
+                        <input type="range" className="form-range w-auto" min="1" max="500" defaultValue="480" step="1" id="speedRange"
                             onChange={this.speedChangeHandle} disabled={this.state.isAnimating} style={{}}></input>
-                        <div className="mt-4">
-                            <input className="form-check-input mx-2" type="checkbox" value="" id="extraFastCheck" onChange={this.extraFastChangeHandle} disabled={this.state.isAnimating}></input>
-                            <label className="form-check-label mx-2" htmlFor="extraFastCheck">Extra-fast Mode</label>
+                        <br />
+                        <div className="mt-2">
+                            <input className="form-check-input mx-1" type="checkbox" value="" id="showValuesCheck" onChange={this.showValuesChangeHandle} disabled={this.state.isAnimating}></input>
+                            <label className="form-check-label mx-1" htmlFor="showValuesCheck">Show Values</label>
+                            <br />
+                            <input className="form-check-input mx-1" type="checkbox" value="" id="extraFastCheck" onChange={this.extraFastChangeHandle} disabled={this.state.isAnimating}></input>
+                            <label className="form-check-label mx-1" htmlFor="extraFastCheck">Extra-fast Mode</label>
                         </div>
                     </div>
 
-                    <div className="form-group mx-5 mt-3">
+                    <div className="form-group mx-auto mt-auto">
                         <div className="mx-auto">
                             <button className="btn btn-dark mx-1 mt-1" onClick={this.selectionSortHandle} disabled={this.state.isAnimating}>Selection Sort</button>
                             <button className="btn btn-dark mx-1 mt-1" onClick={this.bubbleSortHandle} disabled={this.state.isAnimating}>Bubble Sort</button>
@@ -57,10 +65,10 @@ class Visualizer extends React.Component {
                             <button className="btn btn-dark mx-1 mt-1" onClick={this.heapSortHandle} disabled={this.state.isAnimating}>Heap Sort</button>
                             <button className="btn btn-dark mx-1 mt-1" onClick={this.mergeSortHandle} disabled={this.state.isAnimating}>Merge Sort</button>
                             <button className="btn btn-dark mx-1 mt-1" onClick={this.quickSortHandle} disabled={this.state.isAnimating}>Quick Sort</button>
-                            <button className="btn btn-dark mx-1 mt-1" onClick={this.quickSortHandle} disabled={this.state.isAnimating}>Block Sort</button>
+                            <button className="btn btn-dark mx-1 mt-1" onClick={this.quickSortHandle} disabled={this.state.isAnimating}>Bucket Sort?</button>
                         </div>
                         <div className="mx-auto">
-                            <label htmlFor="EnterCustomArrayLabel" className="mt-1">Custom Array</label>
+                            <label htmlFor="EnterCustomArrayLabel" className="mt-1" style={{fontWeight: "bold"}}>Custom Array</label>
                             <input type="email" className="form-control my-2" id="EnterCustomArrayField" placeholder="Must have spaces between elements!" style={{}}></input>
                             <button className="btn btn-dark" onClick={this.customArrayHandle} disabled={this.state.isAnimating} style={{}}>Enter Array</button>
                         </div>
@@ -68,14 +76,10 @@ class Visualizer extends React.Component {
                 </nav>
 
 
-                <div className="array-container"
-                style={{
-                    right:"20%",
-                    left: "1%",
-                }}>
+                <div className="arrayContainer" id="arrayContainer">
                     {this.state.array.map((bar, index) => (
                         <div
-                        className="array-bar border border-auto"
+                        className="arrayBar border border-auto"
                         key={index}
                         style={{
                             height: `${100*bar.value/MAX_ELEMENT_FOUND}%`, 
@@ -84,9 +88,55 @@ class Visualizer extends React.Component {
                         }}></div>
                     ))}
                 </div>
-
-                <div className="rectangle">
+                <div className="arrayContainer" id="valueContainer" style={{bottom: "0%", top:"90.5%"}}>
+                    {this.state.array.map((bar, index) => (
+                        <div
+                        className=""
+                        key={index}
+                        style={{
+                            display: "inline-block",
+                            width: `${BAR_WIDTH}%`,
+                        }}>{SHOW_VALUES && bar.value}</div>
+                    ))}
                 </div>
+                <div className="sideRectangle p-3">
+                    <label id="AlgorithmName" style={{fontWeight: "bold"}}>No Algorithm</label>
+                    <br />
+                    <label id="AlgorithmTime" style={{wordWrap: "break-word"}}>Time Complexity:</label>
+                    <br />
+                    <label id="AlgorithmSpace" style={{wordWrap: "break-word"}}>Space Complexity:</label>
+                    <br />
+                    <label id="AlgorithmDescription" className="mt-1" style={{wordWrap: "break-word"}}>No Description</label>
+
+
+                    <label className="colorText" style={{bottom: "31%"}}>= Unsorted</label>
+                    <div className="colorIndicator" style={{backgroundColor: UNSORTED_COLOR, top: "65%"}}></div>
+                    <label className="colorText" style={{bottom: "26%"}}>= Comparing</label>
+                    <div className="colorIndicator" style={{backgroundColor: CHECK_COLOR, top: "70%"}}></div>
+                    <label className="colorText" style={{bottom: "21%"}}>= Sorting</label>
+                    <div className="colorIndicator" style={{backgroundColor: SORTING_COLOR, top: "75%"}}></div>
+                    <label className="colorText" style={{bottom: "16%"}}>= Sorted</label>
+                    <div className="colorIndicator" style={{backgroundColor: SORTED_COLOR, top: "80%"}}></div>
+                    <label className="colorText" style={{bottom: "11%"}}>= Wall</label>
+                    <div className="colorIndicator" style={{backgroundColor: WALL_COLOR, top: "85%"}}></div>
+                    <label className="colorText" style={{bottom: "6%"}}>= Root/Pivot</label>
+                    <div className="colorIndicator" style={{backgroundColor: EXTRA_COMPARISON_COLOR, top: "90%"}}></div>
+
+                    <label id="AlgorithmName" style={{position: "absolute", fontWeight: "bold", right: "16%", bottom: "25%"}}>Manual Frame<br />Movement</label>
+                    <button className="btn btn-dark mx-1 mt-1" onClick={this.frameLeft} disabled={this.state.isAnimating} style={{
+                        position: "absolute",
+                        bottom: "12%",
+                        right: "33%",
+                        width: "15%"
+                    }}>←</button>
+                    <button className="btn btn-dark mx-1 mt-1" onClick={this.frameRight} disabled={this.state.isAnimating} style={{
+                        position: "absolute",
+                        bottom: "12%",
+                        right: "13%",
+                        width: "15%"
+                    }}>→</button>
+                </div>
+                <div className="bottomRectangle"></div>
 
             </React.Fragment>
         );
@@ -95,8 +145,7 @@ class Visualizer extends React.Component {
     // Set default state
     componentDidMount() {
         ARRAY_SIZE = document.getElementById("arraySizeRange").value;
-        MARGIN_LEFT = 5/ARRAY_SIZE;
-        BAR_WIDTH = (100-5-(MARGIN_LEFT*ARRAY_SIZE))/ARRAY_SIZE;
+        BAR_WIDTH = (100)/ARRAY_SIZE;
         ANIMATION_SPEED = 500-document.getElementById("speedRange").value;
         FAST_MODE = document.getElementById("extraFastCheck").value;
         this.setState({array: this.newArray()});
@@ -113,15 +162,23 @@ class Visualizer extends React.Component {
         ANIMATION_SPEED = 500-document.getElementById("speedRange").value;
     }
 
+    showValuesChangeHandle = () => {
+        SHOW_VALUES = !SHOW_VALUES;
+        this.setState({});
+    }
+
     arraySizeChangeHandle = () => {
         ARRAY_SIZE = document.getElementById("arraySizeRange").value;
-        MARGIN_LEFT = 5/ARRAY_SIZE;
-        BAR_WIDTH = (100-5-(MARGIN_LEFT*ARRAY_SIZE))/ARRAY_SIZE;
+        BAR_WIDTH = (100)/ARRAY_SIZE;
         this.setState({array: this.newArray()});
     }
 
     extraFastChangeHandle = () => {
         FAST_MODE = !FAST_MODE;
+    }
+
+    showValuesChange = () => {
+        document.getElementById()
     }
 
     customArrayHandle = () => {
@@ -147,8 +204,7 @@ class Visualizer extends React.Component {
         }
         // Change "constants"
         ARRAY_SIZE = arr.length;
-        MARGIN_LEFT = 5/ARRAY_SIZE;
-        BAR_WIDTH = (100-5-(MARGIN_LEFT*ARRAY_SIZE))/ARRAY_SIZE;
+        BAR_WIDTH = (100)/ARRAY_SIZE;
         console.log(ARRAY_SIZE);
         console.log("Made new custom array");
         console.log(arr);
@@ -162,12 +218,26 @@ class Visualizer extends React.Component {
         }
     }
 
+    frameLeft = () => {
+        if (HAS_ANIMATED && FRAME_INDEX > 0) {
+            FRAME_INDEX--;
+            this.setState({array: this.state.frames[FRAME_INDEX]});
+        }
+    }
+
+    frameRight = () => {
+        if (HAS_ANIMATED && FRAME_INDEX < this.state.frames.length-1) {
+            FRAME_INDEX++;
+            this.setState({array: this.state.frames[FRAME_INDEX]});
+        }
+    }
+
     // Creates a new array and returns it
     newArray = () => {
         const arr = [];
         for (let i = 0; i < ARRAY_SIZE; i++) {
             let bar = {
-                value: getRandomInt(5, MAX_ARRAY_ELEMENT_NUMBER),
+                value: this.getRandomInt(5, MAX_ARRAY_ELEMENT_NUMBER),
                 color: UNSORTED_COLOR,
             }
             arr.push(bar);
@@ -185,6 +255,13 @@ class Visualizer extends React.Component {
 
     // Selection sort the array - called by Selection Sort Button
     selectionSortHandle = () => {
+
+        // Change Info
+        document.getElementById("AlgorithmName").innerHTML = "Selection Sort";
+        document.getElementById("AlgorithmTime").innerHTML ="Time Complexity: Θ(n^2)";
+        document.getElementById("AlgorithmSpace").innerHTML ="Space Complexity: O(1)";
+        document.getElementById("AlgorithmDescription").innerHTML = "Loops through unsorted elements to find the minimum, swaps the minimum with the next unsorted element.";
+
         this.state.frames = [];
         let minIndex, temp;
         // Brand new array copied from this.state.array
@@ -209,7 +286,7 @@ class Visualizer extends React.Component {
             // Set sorting colors and save frame a lot of times so it has a pause
             arr[minIndex].color = SORTING_COLOR;
             arr[startIndex].color = SORTING_COLOR;
-            this.saveFrames(arr, PAUSE_MULTIPLIER, false);
+            this.saveFrames(arr, Math.floor(PAUSE_MULTIPLIER), false);
 
             // Swap values
             temp = arr[minIndex].value;
@@ -227,6 +304,13 @@ class Visualizer extends React.Component {
 
     // Bubble sort the array - called by Bubble Sort Button
     bubbleSortHandle = () => {
+
+        // Change Info
+        document.getElementById("AlgorithmName").innerHTML = "Bubble Sort";
+        document.getElementById("AlgorithmTime").innerHTML ="Time Complexity: Θ(n^2)";
+        document.getElementById("AlgorithmSpace").innerHTML ="Space Complexity: O(1)";
+        document.getElementById("AlgorithmDescription").innerHTML = "Loops through unsorted elements swapping neighbors if left < right n-1 times.";
+
         this.state.frames = [];
         console.log("Start Bubble Sort");
 
@@ -266,6 +350,12 @@ class Visualizer extends React.Component {
 
     // Insertion sort the array - called by Insertion Sort Button
     insertionSortHandle = () => {
+
+        document.getElementById("AlgorithmName").innerHTML = "Insertion Sort";
+        document.getElementById("AlgorithmTime").innerHTML ="Time Complexity: Θ(n^2)";
+        document.getElementById("AlgorithmSpace").innerHTML ="Space Complexity: O(1)";
+        document.getElementById("AlgorithmDescription").innerHTML = "Loops through sorted elements shifting each to the right if the next unsorted element is lesser, inserts next element.";
+
         this.state.frames = [];
         console.log("Start Insertion Sort");
         // Brand new array copied from this.state.array
@@ -297,7 +387,7 @@ class Visualizer extends React.Component {
 
             // Set sorting color and pause
             arr[curIndex+1].color = SORTING_COLOR;
-            this.saveFrames(arr, PAUSE_MULTIPLIER/1, false);
+            this.saveFrames(arr, Math.floor(PAUSE_MULTIPLIER), false);
             arr[curIndex+1].color = SORTED_COLOR;
 
             this.saveFrames(arr, 1, true);
@@ -322,6 +412,12 @@ class Visualizer extends React.Component {
     }
 
     quickSort = (arr, lowIndex, highIndex) => {
+
+        document.getElementById("AlgorithmName").innerHTML = "Quick Sort";
+        document.getElementById("AlgorithmTime").innerHTML ="Time Complexity: Θ(nlog(n))";
+        document.getElementById("AlgorithmSpace").innerHTML ="Space Complexity: O(log(n))";
+        document.getElementById("AlgorithmDescription").innerHTML = "Picks a pivot, finds pairs of elements greater and lesser than the pivot on corresponding sides, swaps them, inserts the pivot, then recursively calls itself on both sides of the pivot.";
+
         arr[lowIndex].color = WALL_COLOR;
         arr[highIndex].color = WALL_COLOR;
         this.saveFrames(arr, 1, false);
@@ -424,6 +520,13 @@ class Visualizer extends React.Component {
 
     // Merge Sort the array - called by Merge Sort Button
     mergeSortHandle = () => {
+
+        // Change Info
+        document.getElementById("AlgorithmName").innerHTML = "Merge Sort";
+        document.getElementById("AlgorithmTime").innerHTML ="Time Complexity: Θ(nlog(n))";
+        document.getElementById("AlgorithmSpace").innerHTML ="Space Complexity: O(n)";
+        document.getElementById("AlgorithmDescription").innerHTML = "Recursively halves the array until there is one element in each, creates a duplicate of both halves, then loops through the halves adding the lesser element to the original array.";
+
         this.state.frames = [];
         console.log("Start Merge Sort");
         // Brand new array copied from this.state.array
@@ -540,6 +643,12 @@ class Visualizer extends React.Component {
         // pink are it's childs, it takes the largest of the three of
         // and puts it at the root index
 
+        // Change Info
+        document.getElementById("AlgorithmName").innerHTML = "Heap Sort";
+        document.getElementById("AlgorithmTime").innerHTML ="Time Complexity: Θ(nlog(n))";
+        document.getElementById("AlgorithmSpace").innerHTML ="Space Complexity: O(1)";
+        document.getElementById("AlgorithmDescription").innerHTML = "Turns the array into a max heap, then places the root at the end of the unsorted portion of the array and maxHeapifys n-1 times.";
+
         this.state.frames = [];
         console.log("Start Heap Sort");
         // Brand new array copied from this.state.array
@@ -624,8 +733,9 @@ class Visualizer extends React.Component {
 
     // Loops through frames array slowly - called by sorting functions
     animate = () => {
-        console.log("Sorted Array:");
-        console.log(this.state.array);
+        FRAME_INDEX = 0;
+        this.printArray(this.state.array);
+
         let i = 0;
         this.setState({array: this.state.frames[i]});
         this.setState({isAnimating: true});
@@ -637,6 +747,17 @@ class Visualizer extends React.Component {
                 clearInterval(this.myInterval);
             }
         }, ANIMATION_SPEED);
+        HAS_ANIMATED = true;
+    }
+
+    printArray = (arr) => {
+        console.log("Sorted Array:");
+        let output = "["
+        for (let i = 0; i < ARRAY_SIZE-1; i++) {
+            output += String(arr[i].value) + ", ";
+        }
+        output += String(arr[ARRAY_SIZE-1].value) + "]";
+        console.log(output);
     }
     
     // Saves given array to this.state.frames
@@ -652,10 +773,10 @@ class Visualizer extends React.Component {
             }
         }
     }
-}
 
-function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min) ) + min;
+    getRandomInt (min, max) {
+        return Math.floor(Math.random() * (max - min) ) + min;
+    }
 }
 
 export default Visualizer;
