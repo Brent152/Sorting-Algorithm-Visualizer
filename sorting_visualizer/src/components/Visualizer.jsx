@@ -37,7 +37,7 @@ class Visualizer extends React.Component {
                     <div className="mx-auto">
                         <label htmlFor="arraySizeRange" className="form-label" style={{fontWeight: "bold"}}>Random Array Size</label>
                         <br />
-                        <input type="range" className="form-range w-auto" min="2" max="500" defaultValue="100" step="1" id="arraySizeRange"
+                        <input type="range" className="form-range w-auto" min="2" max="470" defaultValue="100" step="1" id="arraySizeRange"
                             onChange={this.arraySizeChangeHandle} disabled={this.state.isAnimating} style={{}}></input>
                         <br />
                         <button className="btn btn-dark mt-3" onClick={this.generateArrayHandle} disabled={this.state.isAnimating}>Generate New Random Array</button>
@@ -121,7 +121,7 @@ class Visualizer extends React.Component {
                     <label className="colorText" style={{bottom: "6%"}}>= Root/Pivot</label>
                     <div className="colorIndicator" style={{backgroundColor: EXTRA_COMPARISON_COLOR, top: "90%"}}></div>
 
-                    <label id="AlgorithmName" style={{position: "absolute", fontWeight: "bold", right: "16%", bottom: "25%"}}>Manual Frame<br />Movement</label>
+                    <label id="AlgorithmName" style={{position: "absolute", fontWeight: "bold", left: "50%", bottom: "25%"}}>Manual Frame<br />Movement</label>
                     <button className="btn btn-dark mx-1 mt-1" onClick={this.frameLeft} disabled={this.state.isAnimating} style={{
                         position: "absolute",
                         bottom: "12%",
@@ -270,6 +270,7 @@ class Visualizer extends React.Component {
         document.getElementById("AlgorithmTime").innerHTML ="Time Complexity: Θ(n^2)";
         document.getElementById("AlgorithmSpace").innerHTML ="Space Complexity: O(1)";
         document.getElementById("AlgorithmDescription").innerHTML = "Loops through unsorted elements to find the minimum, swaps the minimum with the next unsorted element.";
+        document.getElementById("AlgorithmDescription").style.fontSize ="100%";
 
         this.state.frames = [];
         let minIndex, temp;
@@ -319,6 +320,7 @@ class Visualizer extends React.Component {
         document.getElementById("AlgorithmTime").innerHTML ="Time Complexity: Θ(n^2)";
         document.getElementById("AlgorithmSpace").innerHTML ="Space Complexity: O(1)";
         document.getElementById("AlgorithmDescription").innerHTML = "Loops through unsorted elements swapping neighbors if left < right n-1 times.";
+        document.getElementById("AlgorithmDescription").style.fontSize ="100%";
 
         this.state.frames = [];
         console.log("Start Bubble Sort");
@@ -364,7 +366,8 @@ class Visualizer extends React.Component {
         document.getElementById("AlgorithmTime").innerHTML ="Time Complexity: Θ(n^2)";
         document.getElementById("AlgorithmSpace").innerHTML ="Space Complexity: O(1)";
         document.getElementById("AlgorithmDescription").innerHTML = "Loops through sorted elements shifting each to the right if the next unsorted element is lesser, inserts next element.";
-
+        document.getElementById("AlgorithmDescription").style.fontSize ="100%";
+        
         this.state.frames = [];
         console.log("Start Insertion Sort");
         // Brand new array copied from this.state.array
@@ -407,6 +410,13 @@ class Visualizer extends React.Component {
 
     // Quick Sort the array - called by Quick Sort Button
     quickSortHandle = () => {
+
+        document.getElementById("AlgorithmName").innerHTML = "Quick Sort";
+        document.getElementById("AlgorithmTime").innerHTML ="Time Complexity: Θ(nlog(n))";
+        document.getElementById("AlgorithmSpace").innerHTML ="Space Complexity: O(log(n))";
+        document.getElementById("AlgorithmDescription").innerHTML = "Picks a pivot, finds pairs of elements greater and lesser than the pivot on corresponding sides, swaps them, inserts the pivot, then recursively calls itself on both sides of the pivot.";
+        document.getElementById("AlgorithmDescription").style.fontSize ="85%";
+
         this.state.frames = [];
         console.log("Start Quick Sort");
         // Brand new array copied from this.state.array
@@ -421,11 +431,6 @@ class Visualizer extends React.Component {
     }
 
     quickSort = (arr, lowIndex, highIndex) => {
-
-        document.getElementById("AlgorithmName").innerHTML = "Quick Sort";
-        document.getElementById("AlgorithmTime").innerHTML ="Time Complexity: Θ(nlog(n))";
-        document.getElementById("AlgorithmSpace").innerHTML ="Space Complexity: O(log(n))";
-        document.getElementById("AlgorithmDescription").innerHTML = "Picks a pivot, finds pairs of elements greater and lesser than the pivot on corresponding sides, swaps them, inserts the pivot, then recursively calls itself on both sides of the pivot.";
 
         arr[lowIndex].color = WALL_COLOR;
         arr[highIndex].color = WALL_COLOR;
@@ -535,6 +540,7 @@ class Visualizer extends React.Component {
         document.getElementById("AlgorithmTime").innerHTML ="Time Complexity: Θ(nlog(n))";
         document.getElementById("AlgorithmSpace").innerHTML ="Space Complexity: O(n)";
         document.getElementById("AlgorithmDescription").innerHTML = "Recursively halves the array until there is one element in each, creates a duplicate of both halves, then loops through the halves adding the lesser element to the original array.";
+        document.getElementById("AlgorithmDescription").style.fontSize ="85%";
 
         this.state.frames = [];
         console.log("Start Merge Sort");
@@ -657,6 +663,7 @@ class Visualizer extends React.Component {
         document.getElementById("AlgorithmTime").innerHTML ="Time Complexity: Θ(nlog(n))";
         document.getElementById("AlgorithmSpace").innerHTML ="Space Complexity: O(1)";
         document.getElementById("AlgorithmDescription").innerHTML = "Turns the array into a max heap, then places the root at the end of the unsorted portion of the array and maxHeapifys n-1 times.";
+        document.getElementById("AlgorithmDescription").style.fontSize ="100%";
 
         this.state.frames = [];
         console.log("Start Heap Sort");
