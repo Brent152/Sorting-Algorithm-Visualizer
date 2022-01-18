@@ -219,16 +219,26 @@ class Visualizer extends React.Component {
     }
 
     frameLeft = () => {
-        if (HAS_ANIMATED && FRAME_INDEX > 0) {
-            FRAME_INDEX--;
-            this.setState({array: this.state.frames[FRAME_INDEX]});
+        if (HAS_ANIMATED) {
+            if (FRAME_INDEX > 0) {
+                FRAME_INDEX--;
+                this.setState({array: this.state.frames[FRAME_INDEX]});
+            } else {
+                FRAME_INDEX = this.state.frames.length-1;
+                this.setState({array: this.state.frames[FRAME_INDEX]});
+            }
         }
     }
 
     frameRight = () => {
-        if (HAS_ANIMATED && FRAME_INDEX < this.state.frames.length-1) {
-            FRAME_INDEX++;
-            this.setState({array: this.state.frames[FRAME_INDEX]});
+        if (HAS_ANIMATED) {
+            if (FRAME_INDEX < this.state.frames.length-1) {
+                FRAME_INDEX++;
+                this.setState({array: this.state.frames[FRAME_INDEX]});
+            } else {
+                FRAME_INDEX = 0;
+                this.setState({array: this.state.frames[FRAME_INDEX]});
+            }
         }
     }
 

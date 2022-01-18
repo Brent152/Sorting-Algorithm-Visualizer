@@ -27,6 +27,7 @@
   bottom: 13%;
   right: 1%;
   background-color: rgba(3, 24, 24, 0.055);
+  border-radius: 8px;
 }
 
 .colorIndicator {
@@ -34,6 +35,7 @@
   width: 3%;
   height: 3%;
   left: 10%;
+  border-radius: 4px;
 }
 
 .colorText {
