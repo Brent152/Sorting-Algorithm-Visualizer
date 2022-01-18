@@ -88,10 +88,9 @@ class Visualizer extends React.Component {
                         }}></div>
                     ))}
                 </div>
-                <div className="arrayContainer" id="valueContainer" style={{bottom: "0%", top:"90.5%"}}>
+                <div className="arrayContainer" id="valueContainer" style={{bottom: "0%", top:"90.5%", height:"0%"}}>
                     {this.state.array.map((bar, index) => (
                         <div
-                        className=""
                         key={index}
                         style={{
                             display: "inline-block",
