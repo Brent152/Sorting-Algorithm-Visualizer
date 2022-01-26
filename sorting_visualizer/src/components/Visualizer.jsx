@@ -309,6 +309,7 @@ class Visualizer extends React.Component {
         document.getElementById("AlgorithmDescription").innerHTML = "Loops through unsorted elements to find the minimum, swaps the minimum with the next unsorted element.";
         document.getElementById("AlgorithmDescription").style.fontSize ="100%";
 
+        // Reset Frames
         this.state.frames = [];
         let minIndex, temp;
         // Brand new array copied from this.state.array
@@ -359,6 +360,7 @@ class Visualizer extends React.Component {
         document.getElementById("AlgorithmDescription").innerHTML = "Loops through unsorted elements swapping neighbors if left < right n-1 times.";
         document.getElementById("AlgorithmDescription").style.fontSize ="100%";
 
+        // Reset Frames
         this.state.frames = [];
         console.log("Start Bubble Sort");
 
@@ -367,6 +369,7 @@ class Visualizer extends React.Component {
         for (const element of this.state.array) {
             arr.push(element);
         }
+
         // Bubble Sort
         let temp;
         for (let i = 0; i < ARRAY_SIZE-1; i++) {
@@ -390,6 +393,7 @@ class Visualizer extends React.Component {
             arr[ARRAY_SIZE-i-1].color = SORTED_COLOR;
             this.saveFrames(arr, 1, true);
         }
+        // Change the last element to sorted
         arr[0].color = SORTED_COLOR;
         this.saveFrames(arr, 1, true);
         // Animate the frames array
@@ -399,32 +403,42 @@ class Visualizer extends React.Component {
     // Insertion sort the array - called by Insertion Sort Button
     insertionSortHandle = () => {
 
+        // Change Info
         document.getElementById("AlgorithmName").innerHTML = "Insertion Sort";
         document.getElementById("AlgorithmTime").innerHTML ="Time Complexity: Θ(n^2)";
         document.getElementById("AlgorithmSpace").innerHTML ="Space Complexity: O(1)";
         document.getElementById("AlgorithmDescription").innerHTML = "Loops through sorted elements shifting each to the right if the next unsorted element is lesser, inserts next element.";
         document.getElementById("AlgorithmDescription").style.fontSize ="100%";
         
+        // Reset frames
         this.state.frames = [];
         console.log("Start Insertion Sort");
+
         // Brand new array copied from this.state.array
         const arr = [];
         for (const element of this.state.array) {
             arr.push(element);
         }
 
+        // First element is automatically sorted
         arr[0].color = SORTED_COLOR;
 
+        // Loop through array moving new values into their proper place
         for (let sortingIndex = 1; sortingIndex < ARRAY_SIZE; sortingIndex++) {
             
+            // Store current new value in temp variable
             let temp = arr[sortingIndex].value;
             arr[sortingIndex].color = SORTING_COLOR;
+
             // Set sorting color and pause
             for (let i = 0; i < PAUSE_MULTIPLIER/1.5; i++) {
                 this.saveFrames(arr, 1, false);
             }
             
             let curIndex = sortingIndex-1;
+            
+            // While the comparison (temp) value is greater than the cur value,
+            // set the next value to current value and change colors accordingly
             while (curIndex >= 0 && arr[curIndex].value > temp) {
                 arr[curIndex+1].color = CHECK_COLOR;
                 this.saveFrames(arr, 1, false);
@@ -432,6 +446,7 @@ class Visualizer extends React.Component {
                 arr[curIndex+1].color = SORTED_COLOR;
                 curIndex--;
             }
+            // Insert the new element (temp)
             arr[curIndex+1].value = temp;
 
             // Set sorting color and pause
@@ -448,12 +463,14 @@ class Visualizer extends React.Component {
     // Quick Sort the array - called by Quick Sort Button
     quickSortHandle = () => {
 
+        // Change Info
         document.getElementById("AlgorithmName").innerHTML = "Quick Sort";
         document.getElementById("AlgorithmTime").innerHTML ="Time Complexity: Θ(nlog(n))";
         document.getElementById("AlgorithmSpace").innerHTML ="Space Complexity: O(log(n))";
         document.getElementById("AlgorithmDescription").innerHTML = "Picks a pivot, finds pairs of elements greater and lesser than the pivot on corresponding sides, swaps them, inserts the pivot, then recursively calls itself on both sides of the pivot.";
         document.getElementById("AlgorithmDescription").style.fontSize ="85%";
 
+        // Reset Frames
         this.state.frames = [];
         console.log("Start Quick Sort");
         // Brand new array copied from this.state.array
@@ -462,6 +479,7 @@ class Visualizer extends React.Component {
             arr.push(element);
         }
 
+        // Call quickSort (its recursive so it will run itself)
         this.quickSort(arr, 0, ARRAY_SIZE-1);
 
         this.animate();
@@ -469,6 +487,7 @@ class Visualizer extends React.Component {
 
     quickSort = (arr, lowIndex, highIndex) => {
 
+        // Set wall colors
         arr[lowIndex].color = WALL_COLOR;
         arr[highIndex].color = WALL_COLOR;
         this.saveFrames(arr, 1, false);
@@ -476,13 +495,17 @@ class Visualizer extends React.Component {
         // Pick the middle index as the pivot, this is slower than doing something like
         // the middle-of-3 method, but for visualization I think the middle index makes
         // the most sense 
+        // Save the pivotValue and pivotIndex
         let pivotValue = arr[Math.floor(lowIndex + (highIndex - lowIndex)/2)].value;
         let pivotIndex = Math.floor(lowIndex + (highIndex - lowIndex)/2);
+        // incrementedI and decrementedJ boolean flags used for tracking colors
         let incrementedI, decrementedJ;
         arr[pivotIndex].color = EXTRA_COMPARISON_COLOR;
 
+        // Set i and j to the lower and upper walls respectively
         let i = lowIndex, j = highIndex, temp;
 
+        // Check if these walls are already sorted
         if (lowIndex >= highIndex) {
             // All stuff in these bounds must be sorted
             arr[lowIndex].color = SORTED_COLOR;
@@ -492,10 +515,13 @@ class Visualizer extends React.Component {
             return;
         }
 
+        // While the lower index starting at lower wall is lower than the higher
+        // index starting at upper wall
         while (i <= j) {
             // Had to combine two loops into one with if statements for animation purposes
             while (arr[i].value < pivotValue || arr[j].value > pivotValue) {
                 // Increment i until it finds a value greater than pivot
+                // Change colors corresponding
                 if (arr[i].value < pivotValue) {
                     arr[i].color = CHECK_COLOR;
                     i++;
@@ -505,6 +531,7 @@ class Visualizer extends React.Component {
                     incrementedI = false;
                 }
                 // Decrement j until it finds a value less than pivot
+                // Change colors corresponding
                 if (arr[j].value > pivotValue) {
                     arr[j].color = CHECK_COLOR;
                     j--;
@@ -528,6 +555,7 @@ class Visualizer extends React.Component {
                 arr[lowIndex].color = WALL_COLOR;
                 arr[highIndex].color = WALL_COLOR;
             }
+            // i and j "sorted" for a frame
             arr[i].color = SORTING_COLOR;
             arr[j].color = SORTING_COLOR;
             this.saveFrames(arr, 1, false);
@@ -546,12 +574,14 @@ class Visualizer extends React.Component {
                 j--;
             }
         }
+        // Change lower wall to unsorted if it should be
         if (lowIndex < j) {
             arr[highIndex].color = UNSORTED_COLOR;
             this.saveFrames(arr, 1, false);
             this.quickSort(arr, lowIndex, j);
         }
         
+        // Change upper wall to sorted if it should be
         if (highIndex > i) {
             // Some indicies are assumed sorted? Make all them the right color lol
             for (let w = lowIndex; w < i; w++) {
@@ -561,6 +591,7 @@ class Visualizer extends React.Component {
             this.saveFrames(arr, 1, false);
             this.quickSort(arr, i, highIndex);
         }
+
         // All stuff in these bounds must be sorted
         arr[lowIndex].color = SORTED_COLOR;
         arr[highIndex].color = SORTED_COLOR;
@@ -579,22 +610,33 @@ class Visualizer extends React.Component {
         document.getElementById("AlgorithmDescription").innerHTML = "Recursively halves the array until there is one element in each, creates a duplicate of both halves, then loops through the halves adding the lesser element to the original array.";
         document.getElementById("AlgorithmDescription").style.fontSize ="85%";
 
+        // Reset frames
         this.state.frames = [];
         console.log("Start Merge Sort");
+
         // Brand new array copied from this.state.array
         const arr = [];
         for (const element of this.state.array) {
             arr.push(element);
         }
 
+        // Call mergeSort, it is recursive
         this.mergeSort(arr, 0, ARRAY_SIZE-1);
+
+        // Merge sort doesn't finalize sorts progressively, nothing is
+        // actually sorted until the last merge, so set whole array
+        // to sorted color at the end
         for (let i = 0; i < ARRAY_SIZE; i++) {
             arr[i].color = SORTED_COLOR;
         }
+
         this.saveFrames(arr, 1, true);
+        
         this.animate();
     }
 
+    // Takes a subset of the array, and calls itself twice with the
+    // lower and upper halves of the subset
     mergeSort = (arr, lowIndex, highIndex) => {
         // If array is not one element
         if (lowIndex < highIndex) {
@@ -606,18 +648,24 @@ class Visualizer extends React.Component {
         }
     }
 
+    // Merges two subsets (lowIndex - middleIndex, middleIndex - highIndex)
+    // This is done by copying the elements into two arrays, and comparing
+    // each of their first/next elements, and placing it back into the main
+    // array. With the splitting this leaves the full array sorted
     merge = (arr, lowIndex, middleIndex, highIndex) => {
         // THE TWO BLUE BARS ARE THE INDICIES OF THE VALUES THAT ARE BEING COMPARED,
         // BUT THE VALUES ARE IN THE AUXILLARY ARRAYS SO THOSE VALUES AREN'T SHOWN 
         // BLACK BARS ARE THE EDGES OF THE AUXILLARY ARRAYS, INCLUSIVE
         
+        // Sizes of subsets
         let array1Size = middleIndex - lowIndex + 1;
         let array2Size = highIndex - middleIndex;
 
+        // Declare auxiliary arrays
         let Array1 = new Array(array1Size);
         let Array2 = new Array(array2Size);
 
-        // Copy data to smaller arrays
+        // Copy data to auxiliary arrays
         for (let i = 0; i < array1Size; i++) {
             Array1[i] = arr[lowIndex+i].value;
         }
@@ -625,61 +673,75 @@ class Visualizer extends React.Component {
             Array2[j] = arr[middleIndex+1+j].value;
         }
 
+        // i and j for looping through auxiliary arrays, k
+        // is the start of the merged pieces in the main array
         let i = 0, j = 0, k = lowIndex;
+        // Wall Colors
         arr[lowIndex].color = WALL_COLOR;
         arr[lowIndex+array1Size].color = WALL_COLOR;
+
+        // Loop through both arrays (while i and j are still within their arrays)
         while (i < array1Size && j < array2Size) {
             if (Array1[i] <= Array2[j]) {
-                // wall colors
+                // Wall Colors
                 arr[lowIndex].color = WALL_COLOR;
                 arr[lowIndex+array1Size-1].color = WALL_COLOR;
                 arr[middleIndex+1].color = WALL_COLOR;
                 arr[middleIndex+array2Size].color = WALL_COLOR;
-                // sorting colors
+                // Sorting Colors
                 arr[lowIndex+i].color = SORTING_COLOR;
                 arr[middleIndex+1+j].color = SORTING_COLOR;
 
                 this.saveFrames(arr, 1, false);
                 arr[lowIndex+i].color = UNSORTED_COLOR;
                 arr[middleIndex+1+j].color = UNSORTED_COLOR;
+                
+                // Insert the smaller element into the main array and increment
                 arr[k].value = Array1[i];
                 i++;
+
             } else {
-                // wall colors
+                // Wall Colors
                 arr[lowIndex].color = WALL_COLOR;
                 arr[lowIndex+array1Size-1].color = WALL_COLOR;
                 arr[middleIndex+1].color = WALL_COLOR;
                 arr[middleIndex+array2Size].color = WALL_COLOR;
-                // sorting colors
+                // Sorting Colors
                 arr[lowIndex+i].color = SORTING_COLOR;
                 arr[middleIndex+1+j].color = SORTING_COLOR;
 
                 this.saveFrames(arr, 1, false);
                 arr[lowIndex+i].color = UNSORTED_COLOR;
                 arr[middleIndex+1+j].color = UNSORTED_COLOR;
+                
+                // Insert the smaller element into the main array and increment
                 arr[k].value = Array2[j];
                 j++;
             }
             k++;
         }
-        // wall colors back
+
+        // Wall Colors back
         arr[lowIndex].color = UNSORTED_COLOR;
         arr[lowIndex+array1Size-1].color = UNSORTED_COLOR;
         arr[middleIndex+1].color = UNSORTED_COLOR;
         arr[middleIndex+array2Size].color = UNSORTED_COLOR;
-        // Copy the elements of L
+
+        // Copy any remaining elements of the first subset
         while (i < array1Size) {
             arr[k].value = Array1[i];
             i++;
             k++;
         }
 
-        // Copy the elements of R
+        // Copy any remaining elements of the second subset
         while (j < array2Size) {
             arr[k].value = Array2[j];
             j++;
             k++;
         }
+
+        // Set elements in sorted portion to SORTED_COLOR
         if (lowIndex === 0 && middleIndex+array2Size+1 === ARRAY_SIZE) {
             for (let i = 0; i < ARRAY_SIZE; i++) {
                 arr[i].color = SORTED_COLOR;
@@ -702,6 +764,7 @@ class Visualizer extends React.Component {
         document.getElementById("AlgorithmDescription").innerHTML = "Turns the array into a max heap, then places the root at the end of the unsorted portion of the array and maxHeapifys n-1 times.";
         document.getElementById("AlgorithmDescription").style.fontSize ="100%";
 
+        // Reset frames
         this.state.frames = [];
         console.log("Start Heap Sort");
         // Brand new array copied from this.state.array
@@ -728,6 +791,7 @@ class Visualizer extends React.Component {
             // maxHeapify the reduced heap
             this.maxHeapify(arr, i, 0);
         }
+
         // Don't need to maxHeapify when one element is left but do need to turn it to SORTED_COLOR
         arr[0].color = SORTED_COLOR;
         this.saveFrames(arr, 1, true);
@@ -743,6 +807,8 @@ class Visualizer extends React.Component {
         // Right child
         let rightIndex = 2*rootIndex + 2;
 
+        // Set appropriate child to CHECK_COLOR and largest index to
+        // EXTRA_COMPARISON_COLPOR
         if (leftIndex < heapSize) {
             arr[leftIndex].color = CHECK_COLOR;
             arr[largestIndex].color = EXTRA_COMPARISON_COLOR;
@@ -752,6 +818,8 @@ class Visualizer extends React.Component {
             arr[largestIndex].color = EXTRA_COMPARISON_COLOR;
         }
         this.saveFrames(arr, 1, false);
+
+        // Undo what we just did with colors
         if (leftIndex < heapSize) {
             arr[leftIndex].color = UNSORTED_COLOR;
             arr[largestIndex].color = UNSORTED_COLOR;
@@ -769,11 +837,14 @@ class Visualizer extends React.Component {
             largestIndex = rightIndex;
         }
 
+        // If the rootIndex is not the largest one, swap the largest and root values,
+        // change the colors for a frame, and then maxHeapify any remaining parts of
+        // the array recursively (Ends when largestIndex is rootIndex)
         if (largestIndex !== rootIndex) {
             tempValue = arr[rootIndex].value;
             arr[rootIndex].value = arr[largestIndex].value;
             arr[largestIndex].value = tempValue;
-
+            // Update the colors for a frame
             arr[rootIndex].color = SORTING_COLOR;
             arr[largestIndex].color = SORTING_COLOR;
             this.saveFrames(arr, 1, false);
@@ -795,6 +866,7 @@ class Visualizer extends React.Component {
         document.getElementById("AlgorithmDescription").innerHTML = "Counting Sorts the i'th digit of each element, least significant to most significant.";
         document.getElementById("AlgorithmDescription").style.fontSize ="100%";
 
+        // Reset frames
         this.state.frames = [];
         console.log("Start Radix Sort");
         // Brand new array copied from this.state.array
@@ -803,9 +875,12 @@ class Visualizer extends React.Component {
             arr.push(element);
         }
 
+        // Get max number to know how many digits we need to handle
         let max = this.getMax(arr, ARRAY_SIZE);
 
+        // Call count sort the appropriate amount of times
         for (let exp = 1; Math.floor(max/exp) > 0; exp *= 10) {
+            // If this is the last run through count sort pass true
             if (Math.floor(max/(exp*10)) <= 0) {
                 this.countSort(arr, ARRAY_SIZE, exp, true);
             } else {
@@ -819,6 +894,7 @@ class Visualizer extends React.Component {
         this.animate();
     }
 
+    // Returns the maximum element in the given array
     getMax = (arr, arraySize) => {
         let max = arr[0].value;
         for (let i = 1; i < arraySize; i++) {
@@ -829,13 +905,18 @@ class Visualizer extends React.Component {
         return max;
     }
 
+    // Runs count sort on the array with the given digit index
     countSort = (arr, arraySize, exp, lastRun) => {
+        // Create resul tand count arrays
         let result = new Array(arraySize);
         let count = new Array(10);
+        // Fill count with 0's
         for (let i = 0; i < 10; i++) {
             count[i] = 0;
         }
 
+        // Incremement corresponding count value to whatever digit value
+        // is in the digit index
         for (let i = 0; i < arraySize; i++) {
             count[Math.floor(arr[i].value/exp) % 10]++;
             arr[i].color = SORTING_COLOR;
@@ -843,10 +924,12 @@ class Visualizer extends React.Component {
             arr[i].color = UNSORTED_COLOR;
         }
 
+        // Modify count array as such:
         for (let i = 1; i < 10; i++) {
             count[i] += count[i-1];
         }
 
+        // Loop backwareds through array and forward them into the main array
         for (let i = arraySize-1; i >= 0; i--) {
             result[count[Math.floor(arr[i].value/exp) % 10] - 1] = arr[i].value;
             count[Math.floor(arr[i].value/exp) % 10]--; 
@@ -854,6 +937,8 @@ class Visualizer extends React.Component {
 
         for (let i = 0; i < arraySize; i++) {
             arr[i].value = result[i];
+            // If it is the last run, set the moved element to SORTED_COLOR,
+            // if not set it to UNSORTED_COLOR
             if (lastRun) {
                 arr[i].color = SORTED_COLOR;
                 this.saveFrames(arr, 1, true);
@@ -874,9 +959,12 @@ class Visualizer extends React.Component {
         let i = 0;
         this.setState({array: this.state.frames[i]});
         this.setState({isAnimating: true});
+        // Sets the timing looping through arrays in frames at ANIMATION_SPEED
         this.myInterval = setInterval(() => {
             this.setState({array: this.state.frames[i]});
             i++;
+            // Set isAnimating to false and clear interval when it hits
+            // the end of the array
             if (this.state.frames[i] === undefined) {
                 this.setState({isAnimating: false});
                 clearInterval(this.myInterval);
@@ -885,6 +973,7 @@ class Visualizer extends React.Component {
         HAS_ANIMATED = true;
     }
 
+    // Prints the array in a nice format to the console
     printArray = (arr) => {
         console.log("Sorted Array:");
         let output = "["
@@ -909,6 +998,7 @@ class Visualizer extends React.Component {
         }
     }
 
+    // Returns a random integer between min and max
     getRandomInt (min, max) {
         return Math.floor(Math.random() * (max - min) ) + min;
     }
