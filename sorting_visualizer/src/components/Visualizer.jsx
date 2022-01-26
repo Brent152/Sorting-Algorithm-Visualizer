@@ -1,6 +1,24 @@
+
+// Sorting Algorithm Visualizer
+// Author: Brent Julius
+// Completion Date: 1/25/2022
+// I created this project as a tool for myself to better master/learn sorting algorithms.
+// This was practically my first time using HTML and CSS, and my first ever time utilizing
+// JavaScript and React. Throughout its development I learned a LOT about JavaScript, HTML,
+// CSS, and a moderate amount of React. Please read the disclaimer!
+
+// DISCLAIMER:
+// --------------------- I KNOW I DID NOT USE REACT PROPERLY --------------------- 
+// MY CODE IS NOT ORGANIZED INTO CLASSES WELL BECAUSE I DID NOT UNDERSTAND HOW PASSING
+// REACT PROPS WORKED. THIS DISORGANIZATION IS NOT HOW I NORMALLY CODE. REACT WAS SIMPLY
+// A TOOL I NEEDED TO RUN THE VISUALIZATIONS OF THE ALGORITHMS. THE GOAL OF THE PROJECT
+// WAS TO BETTER MY UNDERSTANDING OF THE ALGORITHMS, NOT LEARN REACT - SO I DID NOT PUT
+// MUCH TIME INTO MASTERING IT. BASICALLY DO NOT JUDGE/CRITISIZE HOW WEIRDLY ORGANIZED
+// THIS PROJECT IS - I KNOW AND I DON'T NORMALLY DO THIS.
+
 import React, { Component } from 'react';
 import './Visualizer.css';
-// I need to make the size of the array bars be based on the size of the screen
+
 const MAX_ARRAY_ELEMENT_NUMBER = 500;
 const UNSORTED_COLOR = "rgb(219, 25, 25)", SORTING_COLOR = "rgb(52, 24, 211)",
         SORTED_COLOR = "rgb(31, 212, 31)", CHECK_COLOR = "fuchsia", WALL_COLOR = "black",
@@ -65,11 +83,11 @@ class Visualizer extends React.Component {
                             <button className="btn btn-dark mx-1 mt-1" onClick={this.heapSortHandle} disabled={this.state.isAnimating}>Heap Sort</button>
                             <button className="btn btn-dark mx-1 mt-1" onClick={this.mergeSortHandle} disabled={this.state.isAnimating}>Merge Sort</button>
                             <button className="btn btn-dark mx-1 mt-1" onClick={this.quickSortHandle} disabled={this.state.isAnimating}>Quick Sort</button>
-                            <button className="btn btn-dark mx-1 mt-1" onClick={this.quickSortHandle} disabled={this.state.isAnimating}>Radix Sort</button>
+                            <button className="btn btn-dark mx-1 mt-1" onClick={this.radixSortHandle} disabled={this.state.isAnimating}>Radix Sort</button>
                         </div>
                         <div className="mx-auto">
                             <label htmlFor="EnterCustomArrayLabel" className="mt-1" style={{fontWeight: "bold"}}>Custom Array</label>
-                            <input type="email" className="form-control my-2" id="EnterCustomArrayField" placeholder="Must have spaces between elements!" style={{}}></input>
+                            <input type="" className="form-control my-2" id="EnterCustomArrayField" placeholder="Must have spaces between elements!" style={{}}></input>
                             <button className="btn btn-dark" onClick={this.customArrayHandle} disabled={this.state.isAnimating} style={{}}>Enter Array</button>
                         </div>
                     </div>
@@ -745,6 +763,88 @@ class Visualizer extends React.Component {
             // Heapify whats left
             this.maxHeapify(arr, heapSize, largestIndex);
         }
+    }
+    // End of Heap Sort
+
+    // Radix Sort the array - called by Radix Sort Button
+    radixSortHandle = () => {
+
+        // Change Info
+        document.getElementById("AlgorithmName").innerHTML = "Radix Sort";
+        document.getElementById("AlgorithmTime").innerHTML ="Time Complexity: Θ(nk)";
+        document.getElementById("AlgorithmSpace").innerHTML ="Space Complexity: O(n+2^d)";
+        document.getElementById("AlgorithmDescription").innerHTML = "Counting Sorts the i'th digit of each element, least significant to most significant.";
+        document.getElementById("AlgorithmDescription").style.fontSize ="100%";
+
+        this.state.frames = [];
+        console.log("Start Radix Sort");
+        // Brand new array copied from this.state.array
+        const arr = [];
+        for (const element of this.state.array) {
+            arr.push(element);
+        }
+
+        let max = this.getMax(arr, ARRAY_SIZE);
+
+        for (let exp = 1; Math.floor(max/exp) > 0; exp *= 10) {
+            if (Math.floor(max/(exp*10)) <= 0) {
+                this.countSort(arr, ARRAY_SIZE, exp, true);
+            } else {
+                this.countSort(arr, ARRAY_SIZE, exp, false);
+            }
+            this.saveFrames(arr, 1, true);
+        }
+
+        this.saveFrames(arr, 1, true);
+
+        this.animate();
+    }
+
+    getMax = (arr, arraySize) => {
+        let max = arr[0].value;
+        for (let i = 1; i < arraySize; i++) {
+            if (arr[i].value > max) {
+                max = arr[i].value;
+            }
+        }
+        return max;
+    }
+
+    countSort = (arr, arraySize, exp, lastRun) => {
+        let result = new Array(arraySize);
+        let count = new Array(10);
+        for (let i = 0; i < 10; i++) {
+            count[i] = 0;
+        }
+
+        for (let i = 0; i < arraySize; i++) {
+            count[Math.floor(arr[i].value/exp) % 10]++;
+            arr[i].color = SORTING_COLOR;
+            this.saveFrames(arr, 1, false);
+            arr[i].color = UNSORTED_COLOR;
+        }
+
+        for (let i = 1; i < 10; i++) {
+            count[i] += count[i-1];
+        }
+
+        for (let i = arraySize-1; i >= 0; i--) {
+            result[count[Math.floor(arr[i].value/exp) % 10] - 1] = arr[i].value;
+            count[Math.floor(arr[i].value/exp) % 10]--; 
+        }
+
+        for (let i = 0; i < arraySize; i++) {
+            arr[i].value = result[i];
+            if (lastRun) {
+                arr[i].color = SORTED_COLOR;
+                this.saveFrames(arr, 1, true);
+            } else {
+                arr[i].color = SORTING_COLOR;
+                this.saveFrames(arr, 1, false);
+                arr[i].color = UNSORTED_COLOR;
+            }
+        }
+        
     }
 
     // Loops through frames array slowly - called by sorting functions
