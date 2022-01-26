@@ -19,18 +19,18 @@
 import React, { Component } from 'react';
 import './Visualizer.css';
 
+// Global constants
 const MAX_ARRAY_ELEMENT_NUMBER = 500;
 const UNSORTED_COLOR = "rgb(219, 25, 25)", SORTING_COLOR = "rgb(52, 24, 211)",
         SORTED_COLOR = "rgb(31, 212, 31)", CHECK_COLOR = "fuchsia", WALL_COLOR = "black",
         EXTRA_COMPARISON_COLOR = "gray";
 const PAUSE_MULTIPLIER = 20;
 
-// Global but changed by user (or caused by a user change)
+// Global but can be changed by user (or caused by a user change)
 let FAST_MODE = false;
 let HAS_ANIMATED = false;
 let FRAME_INDEX = 0;
 let SHOW_VALUES = false;
-
 let ARRAY_SIZE, ANIMATION_SPEED, BAR_WIDTH, MAX_ELEMENT_FOUND;
 
 
@@ -39,6 +39,8 @@ class Visualizer extends React.Component {
     constructor(props) {
         super(props);
 
+        // this.state has an array: array containing bar objects, and an array: frames containing
+        // arrays of bar objects
         this.state = {
             array: [],
             frames: [],
@@ -53,23 +55,28 @@ class Visualizer extends React.Component {
             <React.Fragment>
                 <nav className="navbar navbar-expand-lg navbar-light bg-light">
                     <div className="mx-auto">
+                        {/* Array Size Slider */}
                         <label htmlFor="arraySizeRange" className="form-label" style={{fontWeight: "bold"}}>Random Array Size</label>
                         <br />
                         <input type="range" className="form-range w-auto" min="2" max="470" defaultValue="100" step="1" id="arraySizeRange"
                             onChange={this.arraySizeChangeHandle} disabled={this.state.isAnimating} style={{}}></input>
                         <br />
+                        {/* Generate New Random Array Button */}
                         <button className="btn btn-dark mt-3" onClick={this.generateArrayHandle} disabled={this.state.isAnimating}>Generate New Random Array</button>
                     </div>
                     <div className="w-auto mx-auto">
+                        {/* Speed Slider */}
                         <label htmlFor="speedRange" className="form-label" style={{fontWeight: "bold"}}>Speed</label>
                         <br />
                         <input type="range" className="form-range w-auto" min="1" max="500" defaultValue="480" step="1" id="speedRange"
                             onChange={this.speedChangeHandle} disabled={this.state.isAnimating} style={{}}></input>
                         <br />
                         <div className="mt-2">
+                            {/* Show Values Checkbox */}
                             <input className="form-check-input mx-1" type="checkbox" value="" id="showValuesCheck" onChange={this.showValuesChangeHandle} disabled={this.state.isAnimating}></input>
                             <label className="form-check-label mx-1" htmlFor="showValuesCheck">Show Values</label>
                             <br />
+                            {/* Extra Fast Mode Checkbox */}
                             <input className="form-check-input mx-1" type="checkbox" value="" id="extraFastCheck" onChange={this.extraFastChangeHandle} disabled={this.state.isAnimating}></input>
                             <label className="form-check-label mx-1" htmlFor="extraFastCheck">Extra-fast Mode</label>
                         </div>
@@ -77,6 +84,7 @@ class Visualizer extends React.Component {
 
                     <div className="form-group mx-auto mt-auto">
                         <div className="mx-auto">
+                            {/* Sorting Algorithm Buttons */}
                             <button className="btn btn-dark mx-1 mt-1" onClick={this.selectionSortHandle} disabled={this.state.isAnimating}>Selection Sort</button>
                             <button className="btn btn-dark mx-1 mt-1" onClick={this.bubbleSortHandle} disabled={this.state.isAnimating}>Bubble Sort</button>
                             <button className="btn btn-dark mx-1 mt-1" onClick={this.insertionSortHandle} disabled={this.state.isAnimating}>Insertion Sort</button>
@@ -86,14 +94,16 @@ class Visualizer extends React.Component {
                             <button className="btn btn-dark mx-1 mt-1" onClick={this.radixSortHandle} disabled={this.state.isAnimating}>Radix Sort</button>
                         </div>
                         <div className="mx-auto">
+                            {/* Custom Array Field */}
                             <label htmlFor="EnterCustomArrayLabel" className="mt-1" style={{fontWeight: "bold"}}>Custom Array</label>
                             <input type="" className="form-control my-2" id="EnterCustomArrayField" placeholder="Must have spaces between elements!" style={{}}></input>
+                            {/* Enter Custom Array Button */}
                             <button className="btn btn-dark" onClick={this.customArrayHandle} disabled={this.state.isAnimating} style={{}}>Enter Array</button>
                         </div>
                     </div>
                 </nav>
 
-
+                {/* Maps the this.state.array into bars */}
                 <div className="arrayContainer" id="arrayContainer">
                     {this.state.array.map((bar, index) => (
                         <div
@@ -106,6 +116,9 @@ class Visualizer extends React.Component {
                         }}></div>
                     ))}
                 </div>
+                {/* Maps the this.state.array values to go under bars, If I just showed the value
+                with the bars it flipped stuff upside down and if I ScaleY(-1) it turned the number
+                upside down as well, this is what I could come up with. */}
                 <div className="arrayContainer" id="valueContainer" style={{bottom: "0%", top:"90.5%", height:"0%"}}>
                     {this.state.array.map((bar, index) => (
                         <div
@@ -116,6 +129,7 @@ class Visualizer extends React.Component {
                         }}>{SHOW_VALUES && bar.value}</div>
                     ))}
                 </div>
+                {/* Algorithm Info Box */}
                 <div className="sideRectangle p-3">
                     <label id="AlgorithmName" style={{fontWeight: "bold"}}>No Algorithm</label>
                     <br />
@@ -125,7 +139,7 @@ class Visualizer extends React.Component {
                     <br />
                     <label id="AlgorithmDescription" className="mt-1" style={{wordWrap: "break-word"}}>No Description</label>
 
-
+                    {/* Color Legend */}
                     <label className="colorText" style={{bottom: "31%"}}>= Unsorted</label>
                     <div className="colorIndicator" style={{backgroundColor: UNSORTED_COLOR, top: "65%"}}></div>
                     <label className="colorText" style={{bottom: "26%"}}>= Comparing</label>
@@ -138,8 +152,9 @@ class Visualizer extends React.Component {
                     <div className="colorIndicator" style={{backgroundColor: WALL_COLOR, top: "85%"}}></div>
                     <label className="colorText" style={{bottom: "6%"}}>= Root/Pivot</label>
                     <div className="colorIndicator" style={{backgroundColor: EXTRA_COMPARISON_COLOR, top: "90%"}}></div>
-
-                    <label id="AlgorithmName" style={{position: "absolute", fontWeight: "bold", left: "50%", bottom: "25%"}}>Manual Frame<br />Movement</label>
+                    
+                    {/* Manual frame movement label and buttons */}
+                    <label id="ManualFrameMovementLabel" style={{position: "absolute", fontWeight: "bold", left: "50%", bottom: "25%"}}>Manual Frame<br />Movement</label>
                     <button className="btn btn-dark mx-1 mt-1" onClick={this.frameLeft} disabled={this.state.isAnimating} style={{
                         position: "absolute",
                         bottom: "12%",
@@ -165,39 +180,41 @@ class Visualizer extends React.Component {
         BAR_WIDTH = (100)/ARRAY_SIZE;
         ANIMATION_SPEED = 500-document.getElementById("speedRange").value;
         FAST_MODE = document.getElementById("extraFastCheck").value;
+        // Re-render the state
         this.setState({array: this.newArray()});
         this.setState({frames: []});
     }
 
-    // Called by Generate New Array Button and sets the state to a new array
+    // Generates a new random array
     generateArrayHandle = () => {
         this.setState({array: this.newArray()});
         this.setState({frames: []});
     }
 
+    // Called by moving the speed slider
     speedChangeHandle = () => {
         ANIMATION_SPEED = 500-document.getElementById("speedRange").value;
     }
 
+    // Toggles showing values
     showValuesChangeHandle = () => {
         SHOW_VALUES = !SHOW_VALUES;
         this.setState({});
     }
 
+    // Creates a new random array with size indicated by the slider
     arraySizeChangeHandle = () => {
         ARRAY_SIZE = document.getElementById("arraySizeRange").value;
         BAR_WIDTH = (100)/ARRAY_SIZE;
         this.setState({array: this.newArray()});
     }
 
+    // Toggles extra fast mode
     extraFastChangeHandle = () => {
         FAST_MODE = !FAST_MODE;
     }
 
-    showValuesChange = () => {
-        document.getElementById()
-    }
-
+    // Called by Enter Custom Array button, loads the given information into this.state.array
     customArrayHandle = () => {
         // Get input
         let input = document.getElementById("EnterCustomArrayField").value;
@@ -235,6 +252,7 @@ class Visualizer extends React.Component {
         }
     }
 
+    // Move one frame to the left, loop if at 0
     frameLeft = () => {
         if (HAS_ANIMATED) {
             if (FRAME_INDEX > 0) {
@@ -247,6 +265,7 @@ class Visualizer extends React.Component {
         }
     }
 
+    // Move one frame to the right, loop if at frames.length
     frameRight = () => {
         if (HAS_ANIMATED) {
             if (FRAME_INDEX < this.state.frames.length-1) {
