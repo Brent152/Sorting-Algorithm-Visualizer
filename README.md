@@ -4,7 +4,7 @@ Completion Date: 1/25/2022
 
 Info:
 I created this project as a tool for myself to better master/learn sorting algorithms.
-This was practically my first time using HTML and CSS, and my first ever time utilizing
+This was practically my first time using HTML and CSS, and my first time ever utilizing
 JavaScript and React. Throughout its development I learned a LOT about JavaScript, HTML,
 CSS, and a moderate amount of React. Please read the disclaimer!
 
