@@ -15,7 +15,9 @@ if you haven't used react before you will probably need to do - npm install
 run npm start in console and it will open in default browser - npm start
 
 DISCLAIMER:
---------------------- I KNOW I DID NOT USE REACT PROPERLY --------------------- 
+
+--------------------- I KNOW I DID NOT USE REACT PROPERLY ---------------------
+
 I'm editting this in the future -> I didn't use components or even different files to sort code.
 I think that I was unaware how passing props worked and instead of figuring it out I did this.
 ... I've learned since then don't judge me
